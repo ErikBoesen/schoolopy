@@ -1,0 +1,2 @@
+class Schoology:
+    pass
