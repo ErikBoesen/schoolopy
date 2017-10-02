@@ -1,4 +1,4 @@
-**Note: This library is currently under active development, and does not yet support all possible API requests that Schoology does.**
+**Note: This library is currently under active development, and does not yet support all possible API requests that Schoology does. Function names may change, and no guarantee of backward compatibility is provided at this stage in development.**
 
 # schoolopy
 Python wrapper for Schoology's API.
@@ -18,7 +18,7 @@ Some schools use direct logins through Schoology's website. As a general rule of
 `example.py` contains sample code which may be used to run simple requests. You will need to write your key and secret into `example_config.yml.example` and rename that file to `example_config.yml`.
 
 ## Methods
-* `sc.messages()` - returns a list of `Message` objects representing recent direct messages to your user account.
+* `sc.get_messages()` - returns a list of `Message` objects representing recent direct messages to your user account.
 
 ## Author
 This library was created by [Erik Boesen](https://github.com/ErikBoesen).
