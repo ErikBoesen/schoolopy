@@ -26,14 +26,40 @@ class Schoology:
         return auth
 
     def _get(self, path):
-        #return fromstring(requests.get('https://api.schoology.com/v1/%s' % path, headers={'Authorization': self._oauth_header()}).content.decode())
         return json.loads(requests.get('https://api.schoology.com/v1/%s' % path, headers={'Authorization': self._oauth_header()}).content.decode())
 
-    def messages(self):
+    def get_messages(self):
         return [Message(raw) for raw in self._get('messages/inbox')['message']]
 
-    def schools(self):
+    def get_schools(self):
         return [School(raw) for raw in self._get('schools')['school']]
 
-    def school(self, id):
+    def get_school(self, id):
         return School(self._get('schools/%s' % id))
+
+    def get_buildings(self, id):
+        return [Building(raw) for raw in self._get('schools/%s/buildings' % id)]
+
+    def get_users(self):
+        return [User(raw) for raw in self._get('users')['user']]
+
+    def get_user(self, id):
+        return User(self._get('users/%s' % id))
+
+    def get_groups(self):
+        return [Group(raw) for raw in self._get('groups')['group']]
+
+    def get_group(self, id):
+        return Group(self._get('groups/%s' % id))
+
+    def get_courses(self):
+        return [Course(raw) for raw in self._get('courses')['course']]
+
+    def get_course(self, id):
+        return Course(self._get('courses/%s' % id))
+
+    def get_sections(self):
+        return [Section(raw) for raw in self._get('sections')['section']]
+
+    def get_section(self, id):
+        return Section(self._get('sections/%s' % id))

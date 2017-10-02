@@ -1,4 +1,4 @@
-class _base_model_class(dict):
+class _base_model(dict):
     def __init__(self, json):
         self.json = json
         self.update(json)
@@ -10,19 +10,19 @@ class _base_model_class(dict):
         return '%s(%s)' % (self.__class__.__name__, dict.__repr__(contents))
 
 
-def _model_class(class_name):
-    return type(class_name, (_base_model_class,), {})
+def _model(class_name):
+    return type(class_name, (_base_model,), {})
 
 
-class Message(_base_model_class):
+class Message(_base_model):
     def __init__(self, json):
         super().__init__(json)
         self.recipient_ids = list(map(int, self.recipient_ids.split(',')))
 
-class School(_base_model_class):
-    def __init__(self, json):
-        super().__init__(json)
-        self.id = int(self.id)
-        self.postal_code = int(self.postal_code)
 
-#School = _model_class('School')
+School = _model('School')
+Building = _model('Building')
+User = _model('User')
+Group = _model('Group')
+Course = _model('Course')
+Section = _model('Section')
