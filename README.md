@@ -1,3 +1,5 @@
+**Note: This library is currently under active development, and does not yet support all possible API requests that Schoology does.**
+
 # schoolopy
 Python wrapper for Schoology's API.
 
