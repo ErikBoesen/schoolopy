@@ -32,4 +32,8 @@ class Schoology:
     def messages(self):
         return [Message(raw) for raw in self._get('messages/inbox')['message']]
 
-    def 
+    def schools(self):
+        return [School(raw) for raw in self._get('schools')['school']]
+
+    def school(self, id):
+        return School(self._get('schools/%s' % id))
