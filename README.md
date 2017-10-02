@@ -12,6 +12,9 @@ Obtain your consumer API key and secret from `[your school's subdomain].schoolog
 
 Some schools use direct logins through Schoology's website. As a general rule of thumb, go to your Schoology homepage and replace the path in the URL with `/api`.
 
+## Example
+`example.py` contains sample code which may be used to run simple requests. You will need to write your key and secret into `example_config.yml.example` and rename that file to `example_config.yml`.
+
 ## Methods
 * `sc.messages()` - returns a list of `Message` objects representing recent direct messages to your user account.
 
