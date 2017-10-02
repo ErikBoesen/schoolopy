@@ -63,3 +63,43 @@ class Schoology:
 
     def get_section(self, id):
         return Section(self._get('sections/%s' % id))
+
+    def get_section_enrollments(self, id):
+        return [User(raw) for raw in self._get('sections/%s/enrollments' % id)]
+
+    def get_group_enrollments(self, id):
+        return [User(raw) for raw in self._get('groups/%s/enrollments' % id)]
+
+    # Support getting accesscode
+
+    # TODO: Support ID at the end of enrollments path
+
+    def get_district_events(self):
+        return [Event(raw) for raw in self._get('districts/%s/events' % id)]
+
+    def get_school_events(self):
+        return [Event(raw) for raw in self._get('schools/%s/events' % id)]
+
+    def get_user_events(self):
+        return [Event(raw) for raw in self._get('users/%s/events' % id)]
+
+    def get_section_events(self):
+        return [Event(raw) for raw in self._get('sections/%s/events' % id)]
+
+    def get_group_events(self):
+        return [Event(raw) for raw in self._get('groups/%s/events' % id)]
+
+    def get_district_event(self, district_id, event_id):
+        return Event(self._get('districts/%s/events/%s' % (district_id, event_id)))
+
+    def get_school_event(self, school_id, event_id):
+        return Event(self._get('schools/%s/events/%s' % (school_id, event_id)))
+
+    def get_user_event(self, user_id, event_id):
+        return Event(self._get('users/%s/events/%s' % (user_id, event_id)))
+
+    def get_section_event(self, section_id, event_id):
+        return Event(self._get('sections/%s/events/%s' % (section_id, event_id)))
+
+    def get_group_event(self, group_id, event_id):
+        return Event(self._get('groups/%s/events/%s' % (group_id, event_id)))
