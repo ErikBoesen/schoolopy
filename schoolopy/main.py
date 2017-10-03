@@ -293,4 +293,30 @@ class Schoology:
     # TODO: Support Web Content Package
     # TODO: Support Completion
 
+    def get_friend_requests(self, user_id):
+        return [FriendRequest(raw) for raw in self._get('users/%s/requests/friends' % user_id)]
+
+    def get_friend_request(self, user_id, request_id):
+        return FriendRequest(self._get('users/%s/requests/friends/%s' % (user_id, request_id)))
+
+
+    def get_user_section_invites(self, user_id):
+        return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)]
+
+    def get_user_section_invite(self, user_id, invite_id):
+        return Invite(self._get('users/%s/invites/sections/%s' % (user_id, invite_id)))
+
+    def get_user_group_invites(self, user_id):
+        return [Invite(raw) for raw in self._get('users/%s/invites/groups' % user_id)]
+
+    def get_user_group_invite(self, user_id, invite_id):
+        return Invite(self._get('users/%s/invites/groups/%s' % (user_id, invite_id)))
+
+    def get_user_network(self, user_id):
+        return [User(raw) for raw in self._get('users/%s/network' % user_id)['users']]
+
+
+    def get_user_grades(self, user_id):
+        return [Grade(raw) for raw in self._get('users/%s/grades' % user_id)['section']]
+
     # TODO: Support all User-Specific Objects, User Information, etc. requests
