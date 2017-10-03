@@ -10,5 +10,5 @@ setup(name='schoolopy',
       author_email='me@erikboesen.com',
       license='MIT',
       packages=['schoolopy'],
-      install_requires=[],
+      install_requires=['requests', 'PyYAML'],
       zip_safe=False)

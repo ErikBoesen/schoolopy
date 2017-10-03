@@ -14,7 +14,7 @@ schools = sc.get_schools()
 print(schools)
 
 print('Your first school:')
-print(sc.get_school())
+print(sc.get_school(schools[0].id))
 
 print('Your school\'s buildings:')
 print(sc.get_buildings(schools[0].id))
