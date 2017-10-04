@@ -20,6 +20,10 @@ class Message(_base_model):
         self.recipient_ids = list(map(int, self.recipient_ids.split(',')))
 
 
+class MessageThread(Message):
+    pass
+
+
 School = _model('School')
 Building = _model('Building')
 User = _model('User')
