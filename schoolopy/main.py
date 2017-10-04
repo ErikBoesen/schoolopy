@@ -258,13 +258,13 @@ class Schoology:
 
 
     def get_user_update(self, user_id, update_id):
-        return Update(self._get('users/%s/updates/%s' % (user_id, discussion_id)))
+        return Update(self._get('users/%s/updates/%s' % (user_id, update_id)))
 
     def get_section_update(self, section_id, update_id):
-        return Update(self._get('sections/%s/updates/%s' % (section_id, discussion_id)))
+        return Update(self._get('sections/%s/updates/%s' % (section_id, update_id)))
 
     def get_group_update(self, group_id, update_id):
-        return Update(self._get('groups/%s/updates/%s' % (group_id, discussion_id)))
+        return Update(self._get('groups/%s/updates/%s' % (group_id, update_id)))
 
 
     # TODO: Investigate whether we can get individual comments
@@ -402,9 +402,15 @@ class Schoology:
         :param id: ID of object to check likes of.
         :return: List of users who have liked an object.
         """
-        # TODO: The API automatically returns the number of likers. Figure out a way to work that in for ease of use.
         return [User(raw) for raw in self._get('like/%s' % id)['users']]
 
-    # TODO: IMPLEMENT LIKES FOR COMMENTS!
+    def like_comment(self, id, comment_id):
+        """
+        Like a comment on an object.
+
+        :param id: ID of object on which the comment was written.
+        :param comment_id: ID of comment to like.
+        """
+        pass
 
     # TODO: Support all User-Specific Objects, User Information, etc. requests
