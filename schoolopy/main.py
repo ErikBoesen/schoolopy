@@ -88,19 +88,19 @@ class Schoology:
     # TODO: Support ID at the end of enrollments path
 
     def get_district_events(self, district_id):
-        return [Event(raw) for raw in self._get('districts/%s/events' % district_id)]
+        return [Event(raw) for raw in self._get('districts/%s/events' % district_id)['event']]
 
     def get_school_events(self, school_id):
-        return [Event(raw) for raw in self._get('schools/%s/events' % school_id)]
+        return [Event(raw) for raw in self._get('schools/%s/events' % school_id)['event']]
 
     def get_user_events(self, user_id):
-        return [Event(raw) for raw in self._get('users/%s/events' % user_id)]
+        return [Event(raw) for raw in self._get('users/%s/events' % user_id)['event']]
 
     def get_section_events(self, section_id):
-        return [Event(raw) for raw in self._get('sections/%s/events' % section_)]
+        return [Event(raw) for raw in self._get('sections/%s/events' % section_)['event']]
 
     def get_group_events(self, group_id):
-        return [Event(raw) for raw in self._get('groups/%s/events' % group_id)]
+        return [Event(raw) for raw in self._get('groups/%s/events' % group_id)['event']]
 
 
     def get_district_event(self, district_id, event_id):
@@ -120,19 +120,19 @@ class Schoology:
 
 
     def get_district_blog_posts(self, district_id):
-        return [BlogPost(raw) for raw in self._get('districts/%s/posts' % district_id)]
+        return [BlogPost(raw) for raw in self._get('districts/%s/posts' % district_id)['post']]
 
     def get_school_blog_posts(self, school_id):
-        return [BlogPost(raw) for raw in self._get('schools/%s/posts' % school_id)]
+        return [BlogPost(raw) for raw in self._get('schools/%s/posts' % school_id)['post']]
 
     def get_user_blog_posts(self, user_id):
-        return [BlogPost(raw) for raw in self._get('users/%s/posts' % user_id)]
+        return [BlogPost(raw) for raw in self._get('users/%s/posts' % user_id)['post']]
 
     def get_section_blog_posts(self, section_id):
-        return [BlogPost(raw) for raw in self._get('sections/%s/posts' % section_id)]
+        return [BlogPost(raw) for raw in self._get('sections/%s/posts' % section_id)['post']]
 
     def get_group_blog_posts(self, group_id):
-        return [BlogPost(raw) for raw in self._get('groups/%s/posts' % group_id)]
+        return [BlogPost(raw) for raw in self._get('groups/%s/posts' % group_id)['post']]
 
 
     def get_district_blog_post(self, district_id, post_id):
@@ -152,19 +152,19 @@ class Schoology:
 
 
     def get_district_blog_post_comments(self, district_id, post_id):
-        return BlogPostComment(self._get('districts/%s/posts/%s' % (district_id, post_id)))
+        return [BlogPostComment(raw) for raw in self._get('districts/%s/posts/%s/comments' % (district_id, post_id))['comment']]
 
     def get_school_blog_post_comments(self, school_id, post_id):
-        return BlogPostComment(self._get('schools/%s/posts/%s' % (school_id, post_id)))
+        return [BlogPostComment(raw) for raw in self._get('schools/%s/posts/%s/comments' % (school_id, post_id))['comment']]
 
     def get_user_blog_post_comments(self, user_id, post_id):
-        return BlogPostComment(self._get('users/%s/posts/%s' % (user_id, post_id)))
+        return [BlogPostComment(raw) for raw in self._get('users/%s/posts/%s/comments' % (user_id, post_id))['comment']]
 
     def get_section_blog_post_comments(self, section_id, post_id):
-        return BlogPostComment(self._get('sections/%s/posts/%s' % (section_id, post_id)))
+        return [BlogPostComment(raw) for raw in self._get('sections/%s/posts/%s/comments' % (section_id, post_id))['comment']]
 
     def get_group_blog_post_comments(self, group_id, post_id):
-        return BlogPostComment(self._get('groups/%s/posts/%s' % (group_id, post_id)))
+        return [BlogPostComment(raw) for raw in self._get('groups/%s/posts/%s/comments' % (group_id, post_id))['comment']]
 
 
     def get_district_blog_post_comment(self, district_id, post_id, comment_id):
@@ -184,16 +184,16 @@ class Schoology:
 
 
     def get_district_discussions(self, district_id):
-        return [Discussion(raw) for raw in self._get('districts/%s/discussions' % district_id)]
+        return [Discussion(raw) for raw in self._get('districts/%s/discussions' % district_id)['discussion']]
 
     def get_school_discussions(self, school_id):
-        return [Discussion(raw) for raw in self._get('schools/%s/discussions' % school_id)]
+        return [Discussion(raw) for raw in self._get('schools/%s/discussions' % school_id)['discussion']]
 
     def get_section_discussions(self, section_id):
-        return [Discussion(raw) for raw in self._get('sections/%s/discussions' % section_id)]
+        return [Discussion(raw) for raw in self._get('sections/%s/discussions' % section_id)['discussion']]
 
     def get_group_discussions(self, group_id):
-        return [Discussion(raw) for raw in self._get('groups/%s/discussions' % group_id)]
+        return [Discussion(raw) for raw in self._get('groups/%s/discussions' % group_id)['discussion']]
 
 
     def get_district_discussion(self, district_id, discussion_id):
@@ -210,16 +210,16 @@ class Schoology:
 
 
     def get_district_discussion_replies(self, district_id, discussion_id):
-        return [DiscussionReply(raw) for raw in self._get('districts/%s/discussions/%s/comments' % (district_id, discussion_id))]
+        return [DiscussionReply(raw) for raw in self._get('districts/%s/discussions/%s/comments' % (district_id, discussion_id))['comment']]
 
     def get_school_discussion_replies(self, school_id, discussion_id):
-        return [DiscussionReply(raw) for raw in self._get('schools/%s/discussions/%s/comments' % (school_id, discussion_id))]
+        return [DiscussionReply(raw) for raw in self._get('schools/%s/discussions/%s/comments' % (school_id, discussion_id))['comment']]
 
     def get_section_discussion_replies(self, section_id, discussion_id):
-        return [DiscussionReply(raw) for raw in self._get('sections/%s/discussions/%s/comments' % (section_id, discussion_id))]
+        return [DiscussionReply(raw) for raw in self._get('sections/%s/discussions/%s/comments' % (section_id, discussion_id))['comment']]
 
     def get_group_discussion_replies(self, group_id, discussion_id):
-        return [DiscussionReply(raw) for raw in self._get('groups/%s/discussions/%s/comments' % (group_id, discussion_id))]
+        return [DiscussionReply(raw) for raw in self._get('groups/%s/discussions/%s/comments' % (group_id, discussion_id))['comment']]
 
 
     def get_district_discussion_reply(self, district_id, discussion_id, reply_id):
@@ -236,18 +236,25 @@ class Schoology:
 
 
     def get_user_updates(self, user_id):
-        return [Update(raw) for raw in self._get('users/%s/updates' % user_id)]
+        return [Update(raw) for raw in self._get('users/%s/updates' % user_id)['update']]
 
     def get_section_updates(self, section_id):
-        return [Update(raw) for raw in self._get('sections/%s/updates' % section_id)]
+        return [Update(raw) for raw in self._get('sections/%s/updates' % section_id)['update']]
 
     def get_group_updates(self, group_id):
-        return [Update(raw) for raw in self._get('groups/%s/updates' % group_id)]
+        return [Update(raw) for raw in self._get('groups/%s/updates' % group_id)['update']]
 
 
-    # TODO: This may get something different
-    def get_recent_updates(self):
-        return Update(self._get('recent'))
+    def get_feed(self):
+        """
+        Get update feed for the current user.
+
+        Use this function to see what's on the user's home feed.
+        Theoretically, users/[user ID]/updates could be used as an alternative to this.
+
+        :return: List of recent updates.
+        """
+        return [Update(raw) for raw in self._get('recent')['update']]
 
 
     def get_user_update(self, user_id, update_id):
@@ -262,22 +269,17 @@ class Schoology:
 
     # TODO: Investigate whether we can get individual comments
     def get_user_update_comments(self, user_id, update_id):
-        return [UpdateComment(raw) for raw in self._get('users/%s/updates/%s/comments' % (user_id, update_id))]
+        return [UpdateComment(raw) for raw in self._get('users/%s/updates/%s/comments' % (user_id, update_id))['comment']]
 
     def get_section_update_comments(self, section_id, update_id):
-        return [UpdateComment(raw) for raw in self._get('sections/%s/updates/%s/comments' % (section_id, update_id))]
+        return [UpdateComment(raw) for raw in self._get('sections/%s/updates/%s/comments' % (section_id, update_id))['comment']]
 
     def get_group_update_comments(self, group_id, update_id):
-        return [UpdateComment(raw) for raw in self._get('groups/%s/updates/%s/comments' % (group_id, update_id))]
+        return [UpdateComment(raw) for raw in self._get('groups/%s/updates/%s/comments' % (group_id, update_id))['comment']]
 
 
-    # TODO: These function names might be confusing; figure out what /reminders/type endpoint really returns
-    def get_reminders(self):
-        return [Reminder(raw) for raw in self._get('reminders/type')]
-
-    def get_section_reminders(self, section_id):
-        return [Reminder(raw) for raw in self._get('sections/%s/reminders/type' % section_id)]
-
+    # TODO: Implement Reminder requests
+    # It's unclear what endpoints we should use
 
     # TODO: Support Media Albums
     # TODO: Support Documents
@@ -285,14 +287,14 @@ class Schoology:
 
 
     def get_assignments(self, section_id):
-        return Assignment(self._get('section/%s/assignments' % section_id))
+        return [Assignment(raw) for raw in self._get('section/%s/assignments' % section_id)['assignment']]
 
     def get_assignment(self, section_id, assignment_id):
         return Assignment(self._get('section/%s/assignments/%s' % (section_id, assignment_id)))
 
 
     def get_assignment_comments(self, section_id, assignment_id):
-        return Assignment(self._get('section/%s/assignments/%s/comments' % (section_id, assignment_id)))
+        return [Assignment(raw) for raw in self._get('section/%s/assignments/%s/comments' % (section_id, assignment_id))['comment']]
 
     def get_assignment_comment(self, section_id, assignment_id, comment_id):
         return Assignment(self._get('section/%s/assignments/%s' % (section_id, assignment_id)))
@@ -308,23 +310,24 @@ class Schoology:
     # TODO: Support Completion
 
     def get_friend_requests(self, user_id):
-        return [FriendRequest(raw) for raw in self._get('users/%s/requests/friends' % user_id)]
+        return [FriendRequest(raw) for raw in self._get('users/%s/requests/friends' % user_id)['request']]
 
     def get_friend_request(self, user_id, request_id):
         return FriendRequest(self._get('users/%s/requests/friends/%s' % (user_id, request_id)))
 
 
     def get_user_section_invites(self, user_id):
-        return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)]
+        return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)['invite']]
+
+    def get_user_group_invites(self, user_id):
+        return [Invite(raw) for raw in self._get('users/%s/invites/groups' % user_id)['invite']]
 
     def get_user_section_invite(self, user_id, invite_id):
         return Invite(self._get('users/%s/invites/sections/%s' % (user_id, invite_id)))
 
-    def get_user_group_invites(self, user_id):
-        return [Invite(raw) for raw in self._get('users/%s/invites/groups' % user_id)]
-
     def get_user_group_invite(self, user_id, invite_id):
         return Invite(self._get('users/%s/invites/groups/%s' % (user_id, invite_id)))
+
 
     def get_user_network(self, user_id):
         return [User(raw) for raw in self._get('users/%s/network' % user_id)['users']]
@@ -335,10 +338,10 @@ class Schoology:
 
 
     def get_user_sections(self, user_id):
-        return [Section(raw) for raw in self._get('users/%s/sections' % user_id)]
+        return [Section(raw) for raw in self._get('users/%s/sections' % user_id)['section']]
 
     def get_user_groups(self, user_id):
-        return [Group(raw) for raw in self._get('users/%s/groups' % user_id)]
+        return [Group(raw) for raw in self._get('users/%s/groups' % user_id)['group']]
 
     # TODO: Implement get_user_requests
     # TODO: Implement get_user_invites
@@ -370,7 +373,7 @@ class Schoology:
         :param message_id: ID of the message thread desired.
         :return: list of messages in that thread.
         """
-        return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)]
+        return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
     # Implement search, resource collections, resource templates
 
@@ -402,5 +405,6 @@ class Schoology:
         # TODO: The API automatically returns the number of likers. Figure out a way to work that in for ease of use.
         return [User(raw) for raw in self._get('like/%s' % id)['users']]
 
+    # TODO: IMPLEMENT LIKES FOR COMMENTS!
 
     # TODO: Support all User-Specific Objects, User Information, etc. requests
