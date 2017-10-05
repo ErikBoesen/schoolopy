@@ -433,4 +433,20 @@ class Schoology:
         """
         return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
 
+
+    def get_user_actions(self, user_id, start=0, end=time.time()):
+        """
+        Get analysis of a user's actions over a given period of time.
+
+        This endpoint is typically only available to site admins.
+
+        :param user_id: ID of user to get actions of.
+        :param start: Timestamp at which to start action list.
+        :param end: Timestamp at which to end action list.
+        """
+        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%d&end_time=%d' % (user_id, start, end))['actions']]
+
+    # TODO: Implement other analytics endpoints
+    # TODO: Implement multi-get(!) and multi-options requests. Don't seem to work right now.
+
     # TODO: Support all User-Specific Objects, User Information, etc. requests
