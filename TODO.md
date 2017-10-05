@@ -4,3 +4,4 @@
 * Test all methods, proofread
 * Go through all pages of REST API documentation to make sure we didn't miss any endpoints
 * Support three-legged authentication
+* Implement event triggers and other parts of API other than REST
