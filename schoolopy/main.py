@@ -32,7 +32,10 @@ class Schoology:
         :param path: Path (following API root) to endpoint.
         :return: JSON response.
         """
-        return requests.get(self._ROOT + path, headers={'Authorization': self._oauth_header()}).json()
+        try:
+            return requests.get(self._ROOT + path, headers={'Authorization': self._oauth_header()}).json()
+        except json.decoder.JSONDecodeError:
+            return {}
 
     def _post(self, path, data):
         """
@@ -42,9 +45,12 @@ class Schoology:
         :param data: JSON data to POST.
         :return: JSON response.
         """
-        return requests.post(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+        try:
+            return requests.post(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+        except json.decoder.JSONDecodeError:
+            return {}
 
-    def _post(self, path, data):
+    def _put(self, path, data):
         """
         PUT valid JSON to a given endpoint.
 
@@ -52,7 +58,10 @@ class Schoology:
         :param data: JSON data to PUT.
         :return: JSON response.
         """
-        return requests.put(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+        try:
+            return requests.put(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+        except json.decoder.JSONDecodeError:
+            return {}
 
     def _delete(self, path):
         """
@@ -203,7 +212,7 @@ class Schoology:
         elif group_id:
             return get_group_enrollments(group_id)
         else:
-            raise TypeError('Realm identifier required.')
+            raise TypeError('Realm id property required.')
 
     def get_section_enrollments(self, section_id):
         return [Enrollment(raw) for raw in self._get('sections/%s/enrollments' % section_id)['enrollment']]
@@ -263,7 +272,7 @@ class Schoology:
         elif group_id:
             return update_group_enrollment(group_id, enrollment)
         else:
-            raise TypeError('Realm identifier required.')
+            raise TypeError('Realm id property required.')
 
     def update_section_enrollment(self, section_id, enrollment):
         return update_section_enrollments(section_id, [enrollment])
@@ -292,7 +301,7 @@ class Schoology:
         elif group_id:
             return delete_group_enrollment(group_id, enrollment_id)
         else:
-            raise TypeError('Realm identifier required.')
+            raise TypeError('Realm id property required.')
 
     def delete_section_enrollment(self, section_id, enrollment_id):
         delete_section_enrollments(section_id, [enrollment_id])
@@ -315,7 +324,7 @@ class Schoology:
         elif group_id:
             return delete_group_enrollments(group_id, enrollment_ids)
         else:
-            raise TypeError('Realm identifier required.')
+            raise TypeError('Realm id property required.')
 
     def delete_section_enrollments(self, section_id, enrollment_ids):
         self._delete('sections?enrollment_ids=' + ','.join(enr))
@@ -323,7 +332,29 @@ class Schoology:
     def delete_group_enrollments(self, group_id, enrollment_ids):
         self._delete('groups?enrollment_ids=' + ','.join(enr))
 
-    # TODO: Implement course enrollments import
+    # Course enrollments imports not implemented, similar effect can be obtained
+
+    def get_events(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on events in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm from which to get events.
+        :return: List of Event objects.
+        """
+        if district_id:
+            return get_district_events(district_id)
+        elif school_id:
+            return get_school_events(school_id)
+        elif user_id:
+            return get_user_events(user_id)
+        elif section_id:
+            return get_section_events(section_id)
+        elif group_id:
+            return get_group_events(group_id)
+        else:
+            raise TypeError('Realm id property required.')
 
     def get_district_events(self, district_id):
         return [Event(raw) for raw in self._get('districts/%s/events' % district_id)['event']]
@@ -335,11 +366,73 @@ class Schoology:
         return [Event(raw) for raw in self._get('users/%s/events' % user_id)['event']]
 
     def get_section_events(self, section_id):
-        return [Event(raw) for raw in self._get('sections/%s/events' % section_)['event']]
+        return [Event(raw) for raw in self._get('sections/%s/events' % section_id)['event']]
 
     def get_group_events(self, group_id):
         return [Event(raw) for raw in self._get('groups/%s/events' % group_id)['event']]
 
+
+    def create_event(self, event, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating a new event in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param event: Event object.
+        :param *_id: ID of realm in which to create event.
+        :return: List of Event objects.
+        """
+        if district_id:
+            return create_district_event(event, district_id)
+        elif school_id:
+            return create_school_event(event, school_id)
+        elif user_id:
+            return create_user_event(event, user_id)
+        elif section_id:
+            return create_section_event(event, section_id)
+        elif group_id:
+            return create_group_event(event, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_event(self, event, district_id):
+        return Event(self._post('districts/%s/events' % district_id, event.json))
+
+    def create_school_event(self, event, school_id):
+        return Event(self._post('schools/%s/events' % school_id, event.json))
+
+    def create_user_event(self, event, user_id):
+        return Event(self._post('users/%s/events' % user_id, event.json))
+
+    def create_section_event(self, event, section_id):
+        return Event(self._post('sections/%s/events' % section_id, event.json))
+
+    def create_group_event(self, event, group_id):
+        return Event(self._post('groups/%s/events' % group_id, event.json))
+
+
+    def get_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on an individual event in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param event_id: ID of event on which to get data.
+        :param *_id: ID of realm in which to create event.
+        :return: Event object.
+        """
+        if district_id:
+            return get_district_event(event_id, district_id)
+        elif school_id:
+            return get_school_event(event_id, school_id)
+        elif user_id:
+            return get_user_event(event_id, user_id)
+        elif section_id:
+            return get_section_event(event_id, section_id)
+        elif group_id:
+            return get_group_event(event_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
 
     def get_district_event(self, district_id, event_id):
         return Event(self._get('districts/%s/events/%s' % (district_id, event_id)))
@@ -356,6 +449,30 @@ class Schoology:
     def get_group_event(self, group_id, event_id):
         return Event(self._get('groups/%s/events/%s' % (group_id, event_id)))
 
+    def update_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for updating individual event in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param event_id: ID of event on which to get data.
+        :param *_id: ID of realm in which to create event.
+        """
+        if district_id:
+            get_district_event(event_id, district_id)
+        elif school_id:
+            get_school_event(event_id, school_id)
+        elif user_id:
+            get_user_event(event_id, user_id)
+        elif section_id:
+            get_section_event(event_id, section_id)
+        elif group_id:
+            get_group_event(event_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def update_district_event(self, district_id, event_id):
+        self._put('districts/%s/events/')
 
     def get_district_blog_posts(self, district_id):
         return [BlogPost(raw) for raw in self._get('districts/%s/posts' % district_id)['post']]
