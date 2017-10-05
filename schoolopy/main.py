@@ -411,6 +411,26 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to like.
         """
-        pass
+        return self._post('like/%s/comment/%s' % (id, comment_id), {'like_action': True})['likes']
+
+    def unlike_comment(self, id, comment_id):
+        """
+        UNlike a comment on an object.
+
+        :param id: ID of object on which the comment was written.
+        :param comment_id: ID of comment to unlike.
+        """
+        return self._post('like/%s/comment/%s' % (id, comment_id), {'like_action': False})['likes']
+
+    def vote(self, poll_id, choice_id):
+        """
+        Cast a vote on a poll.
+
+        Poll data is packaged in update objects. Choice and poll IDs can be found there.
+
+        :param poll_id: ID of poll to vote on.
+        :param choice_id: ID of choice you'd like to make.
+        """
+        return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
 
     # TODO: Support all User-Specific Objects, User Information, etc. requests
