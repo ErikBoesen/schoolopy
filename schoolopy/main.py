@@ -64,9 +64,19 @@ class Schoology:
 
 
     def get_schools(self):
+        """
+        Get data on all schools.
+
+        :return: List of school objects of which a user is aware.
+        """
         return [School(raw) for raw in self._get('schools')['school']]
 
     def get_school(self, school_id):
+        """
+        Get data on an individual school.
+
+        :return: School object with data on the requested school.
+        """
         return School(self._get('schools/%s' % school_id))
 
     def create_school(self, school):
@@ -89,10 +99,17 @@ class Schoology:
         # TODO: Does this endpoint return anything?
         self._put('schools/%s' % school_id, school.json)
 
-    def get_buildings(self, building_id):
-        return [Building(raw) for raw in self._get('schools/%s/buildings' % building_id)]
+    def get_buildings(self, school_id):
+        """
+        Get data on buildings in a given school.
+
+        :param school_id: ID of school whose buildings to get.
+        :return: List of building objects in that school.
+        """
+        return [Building(raw) for raw in self._get('schools/%s/buildings' % school_id)]
 
     # There is currently no endpoint for getting data on individual buildings.
+    # This is due in part to the oft-blurred line Schoology draws between schools and buildings.
 
     def create_building(self, school_id, building):
         """
@@ -104,28 +121,89 @@ class Schoology:
         return Building(self._post('schools/%s/buildings' % school_id, building.json))
 
     def get_users(self):
+        """
+        Get data on all users.
+
+        :return: List of User objects.
+        """
         return [User(raw) for raw in self._get('users')['user']]
 
     def get_user(self, user_id):
+        """
+        Get data on an individual user.
+
+        :param user_id: ID of user on whom to get data.
+        :return: User object.
+        """
         return User(self._get('users/%s' % user_id))
 
     def get_groups(self):
+        """
+        Get data on all groups.
+
+        :return: List of Group objects.
+        """
         return [Group(raw) for raw in self._get('groups')['group']]
 
     def get_group(self, group_id):
+        """
+        Get data on an individual group.
+
+        :param group_id: ID of group on which to get data.
+        :return: Group object.
+        """
         return Group(self._get('groups/%s' % group_id))
 
     def get_courses(self):
+        """
+        Get data on all courses.
+
+        :return: List of Course objects.
+        """
         return [Course(raw) for raw in self._get('courses')['course']]
 
     def get_course(self, course_id):
+        """
+        Get data on an individual course.
+
+        :param course_id: ID of course on which to get data.
+        :return: Course object.
+        """
         return Course(self._get('courses/%s' % course_id))
 
     def get_sections(self):
+        """
+        Get data on all sections.
+
+        :return: List of Section objects.
+        """
         return [Section(raw) for raw in self._get('sections')['section']]
 
     def get_section(self, section_id):
+        """
+        Get data on an individual section.
+
+        :param section_id: ID of section on which to get data.
+        :return: Section object.
+        """
         return Section(self._get('sections/%s' % section_id))
+
+    def get_enrollments(self, section_id=None, group_id=None):
+        """
+        Helper function to get enrollments in any realm. Realm will be decided based on named parameters passed.
+
+        You must provide either a section_id or group_id, and name your parameters.
+
+        :param section_id: ID of section whose enrollments to get.
+        :param group_id: ID of group whose enrollments to get.
+        :return: List of User objects.
+        """
+        if section_id:
+            return get_section_enrollments(section_id)
+        elif group_id:
+            return get_group_enrollments(group_id)
+        else:
+            raise TypeError('Realm identifier required.')
 
     def get_section_enrollments(self, section_id):
         return [User(raw) for raw in self._get('sections/%s/enrollments' % section_id)['enrollment']]
