@@ -27,6 +27,7 @@ class MessageThread(Message):
 School = _model('School')
 Building = _model('Building')
 User = _model('User')
+Enrollment = _model('Enrollment')
 Group = _model('Group')
 Course = _model('Course')
 Section = _model('Section')

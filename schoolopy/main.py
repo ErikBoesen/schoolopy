@@ -206,14 +206,48 @@ class Schoology:
             raise TypeError('Realm identifier required.')
 
     def get_section_enrollments(self, section_id):
-        return [User(raw) for raw in self._get('sections/%s/enrollments' % section_id)['enrollment']]
+        return [Enrollment(raw) for raw in self._get('sections/%s/enrollments' % section_id)['enrollment']]
 
     def get_group_enrollments(self, group_id):
-        return [User(raw) for raw in self._get('groups/%s/enrollments' % group_id)['enrollments']]
+        return [Enrollment(raw) for raw in self._get('groups/%s/enrollments' % group_id)['enrollments']]
 
-    # Support getting accesscode
+    # TODO: Create generic create_enrollment method
 
-    # TODO: Support ID at the end of enrollments path
+    def create_section_enrollment(self, section_id, user_id, admin=False, status=1):
+        return Enrollment(self._post('sections/%s/enrollments' % section_id, {'uid': user_id, 'admin': int(admin), 'status': status}))
+
+    def create_group_enrollment(self, group_id, user_id, admin=False, status=1):
+        return Enrollment(self._post('groups/%s/enrollments' % group_id, {'uid': user_id, 'admin': int(admin), 'status': status}))
+
+    # TODO: Do we need to provide the ID of the realm?
+    def join_section(self, access_code):
+        return Enrollment(self._post('sections/accesscode' % access_code, {'access_code': access_code}))
+
+    def join_group(self, access_code):
+        return Enrollment(self._post('sections/accesscode' % access_code, {'access_code': access_code}))
+
+
+    def create_section_enrollments(self, section_id, enrollments):
+        """
+        Create section enrollments in bulk.
+
+        :param section_id: ID of section in which to create enrollments.
+        :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
+        :return: List of Enrollment objects recieved from Schoology API.
+        """
+        return [Enrollment(raw) for raw in self._post('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
+
+    def create_group_enrollments(self, group_id, enrollments):
+        """
+        Create group enrollments in bulk.
+
+        :param group_id: ID of group in which to create enrollments.
+        :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
+        :return: List of Enrollment objects recieved from Schoology API.
+        """
+        return [Enrollment(raw) for raw in self._post('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
+
+    # TODO: Implement course enrollments import
 
     def get_district_events(self, district_id):
         return [Event(raw) for raw in self._get('districts/%s/events' % district_id)['event']]
