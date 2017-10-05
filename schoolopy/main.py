@@ -243,9 +243,85 @@ class Schoology:
 
         :param group_id: ID of group in which to create enrollments.
         :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
-        :return: List of Enrollment objects recieved from Schoology API.
+        :return: List of Enrollment objects recieved from API.
         """
         return [Enrollment(raw) for raw in self._post('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
+
+    def update_enrollment(self, group_id=None, section_id=None, enrollment):
+        """
+        Helper function for updating an enrollment.
+
+        Either group_id or section_id must be specified by name in calls to this method.
+
+        :param group_id: ID of group whose enrollment to edit.
+        :param section_id: ID of section whose enrollment to edit.
+        :param enrollment: Enrollment object containing new data. Must contain at least uid and status properties.
+        :return: List of Enrollment objects recieved from API.
+        """
+        if section_id:
+            return update_section_enrollment(section_id, enrollment)
+        elif group_id:
+            return update_group_enrollment(group_id, enrollment)
+        else:
+            raise TypeError('Realm identifier required.')
+
+    def update_section_enrollment(self, section_id, enrollment):
+        return update_section_enrollments(section_id, [enrollment])
+
+    def update_group_enrollment(self, group_id, enrollment):
+        return update_group_enrollments(group_id, [enrollment])
+
+    def update_section_enrollments(self, section_id, enrollments):
+        return [Enrollment(raw) for raw in self._put('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
+
+    def update_group_enrollments(self, group_id, enrollments):
+        return [Enrollment(raw) for raw in self._put('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
+
+    def delete_enrollment(self, section_id=None, group_id=None, enrollment_id):
+        """
+        Helper function for deleting an enrollment in any realm.
+
+        Either group_id or section_id must be specified by name in calls to this method.
+
+        :param section_id: ID of section from which to delete enrollment.
+        :param group_id: ID of group from which to delete enrollment.
+        :param enrollment_id: ID of enrollment to delete.
+        """
+        if section_id:
+            return delete_section_enrollment(section_id, enrollment_id)
+        elif group_id:
+            return delete_group_enrollment(group_id, enrollment_id)
+        else:
+            raise TypeError('Realm identifier required.')
+
+    def delete_section_enrollment(self, section_id, enrollment_id):
+        delete_section_enrollments(section_id, [enrollment_id])
+
+    def delete_group_enrollment(self, group_id, enrollment_id):
+        delete_group_enrollments(group_id, [enrollment_id])
+
+    def delete_enrollments(self, section_id=None, group_id=None, enrollment_ids):
+        """
+        Helper function for deleting an enrollment in any realm.
+
+        Either group_id or section_id must be specified by name in calls to this method.
+
+        :param section_id: ID of section from which to delete enrollment.
+        :param group_id: ID of group from which to delete enrollment.
+        :param enrollment_id: List of IDs of enrollments to delete.
+        """
+        if section_id:
+            return delete_section_enrollments(section_id, enrollment_ids)
+        elif group_id:
+            return delete_group_enrollments(group_id, enrollment_ids)
+        else:
+            raise TypeError('Realm identifier required.')
+
+    def delete_section_enrollments(self, section_id, enrollment_ids):
+        self._delete('sections?enrollment_ids=' + ','.join(enr))
+
+    def delete_group_enrollments(self, group_id, enrollment_ids):
+        self._delete('groups?enrollment_ids=' + ','.join(enr))
 
     # TODO: Implement course enrollments import
 
