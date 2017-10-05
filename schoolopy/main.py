@@ -44,14 +44,64 @@ class Schoology:
         """
         return requests.post(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
 
+    def _post(self, path, data):
+        """
+        PUT valid JSON to a given endpoint.
+
+        :param path: Path (following API root) to endpoint.
+        :param data: JSON data to PUT.
+        :return: JSON response.
+        """
+        return requests.put(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+
+    def _delete(self, path):
+        """
+        Send a DELETE request to a given endpoint.
+
+        :param path: Path (following API root) to endpoint.
+        """
+        requests.delete(self._ROOT + path, headers={'Authorization': self._oauth_header()})
+
+
     def get_schools(self):
         return [School(raw) for raw in self._get('schools')['school']]
 
     def get_school(self, school_id):
         return School(self._get('schools/%s' % school_id))
 
+    def create_school(self, school):
+        """
+        Create a new school.
+
+        :param school: School object containing necessary fields.
+        :return: School object obtained from API.
+        """
+        return School(self._post('schools', school.json))
+
+    def edit_school(self, school_id, school):
+        """
+        Edit a school.
+
+        :param school_id: ID of school to edit.
+        :param school: School object containing necessary fields.
+        :return: School object obtained from API.
+        """
+        # TODO: Does this endpoint return anything?
+        self._put('schools/%s' % school_id, school.json)
+
     def get_buildings(self, building_id):
         return [Building(raw) for raw in self._get('schools/%s/buildings' % building_id)]
+
+    # There is currently no endpoint for getting data on individual buildings.
+
+    def create_building(self, school_id, building):
+        """
+        Create a new building.
+
+        :param building: Building object containing necessary fields.
+        :return: Building object obtained from API.
+        """
+        return Building(self._post('schools/%s/buildings' % school_id, building.json))
 
     def get_users(self):
         return [User(raw) for raw in self._get('users')['user']]
