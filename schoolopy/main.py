@@ -338,7 +338,7 @@ class Schoology:
         """
         Helper function for getting data on events in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm from which to get events.
         :return: List of Event objects.
@@ -376,7 +376,7 @@ class Schoology:
         """
         Helper function for creating a new event in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param event: Event object.
         :param *_id: ID of realm in which to create event.
@@ -415,7 +415,7 @@ class Schoology:
         """
         Helper function for getting data on an individual event in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param event_id: ID of event on which to get data.
         :param *_id: ID of realm in which to create event.
@@ -453,7 +453,7 @@ class Schoology:
         """
         Helper function for updating individual events in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param event_id: ID of event on which to get data.
         :param *_id: ID of realm in which to create event.
@@ -490,7 +490,7 @@ class Schoology:
         """
         Helper function for deleting individual events in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param event_id: ID of event to delete.
         :param *_id: ID of realm in which to create event.
@@ -528,7 +528,7 @@ class Schoology:
         """
         Helper function for creating blog posts in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param post: BlogPost object to post in the given realm.
         :param *_id: ID of realm in which to create event.
@@ -567,7 +567,7 @@ class Schoology:
         """
         Helper function for creating blog posts in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
@@ -605,7 +605,7 @@ class Schoology:
         """
         Helper function for creating blog posts in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
@@ -643,7 +643,7 @@ class Schoology:
         """
         Helper function for creating blog posts in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
@@ -681,7 +681,7 @@ class Schoology:
         """
         Helper function for deleting blog posts in any realm.
 
-        Exactly one _id property must be specified by name in calls to this method.
+        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
@@ -715,37 +715,182 @@ class Schoology:
         self._delete('groups/%s/posts/%s' % (group_id, post_id))
 
 
-    def get_district_blog_post_comments(self, district_id, post_id):
+    def create_blog_post_comment(self, comment, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating blog posts in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param post: BlogPost object to post in the given realm.
+        :param *_id: ID of realm in which to create event.
+        :return: BlogPost object recieved from API.
+        """
+        if district_id:
+            return create_district_blog_post(comment, post_id, district_id)
+        elif school_id:
+            return create_school_blog_post(comment, post_id, school_id)
+        elif user_id:
+            return create_user_blog_post(comment, post_id, user_id)
+        elif section_id:
+            return create_section_blog_post(comment, post_id, section_id)
+        elif group_id:
+            return create_group_blog_post(comment, post_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_blog_post(self, comment, post_id, district_id):
+        return BlogPost(self._post('districts/%s/posts/%s/comments' % (district_id, post_id), comment.json))
+
+    def create_school_blog_post(self, comment, post_id, school_id):
+        return BlogPost(self._post('schools/%s/posts/%s/comments' % (school_id, post_id), comment.json))
+
+    def create_user_blog_post(self, comment, post_id, user_id):
+        return BlogPost(self._post('users/%s/posts/%s/comments' % (user_id, post_id), comment.json))
+
+    def create_section_blog_post(self, comment, post_id, section_id):
+        return BlogPost(self._post('sections/%s/posts/%s/comments' % (section_id, post_id), comment.json))
+
+    def create_group_blog_post(self, comment, post_id, group_id):
+        return BlogPost(self._post('groups/%s/posts/%s/comments' % (group_id, post_id), comment.json))
+
+
+
+    def get_blog_post_comments(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on blog post comments in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPostComment objects recieved from API.
+        """
+        if district_id:
+            return get_district_blog_post_comments(post_id, district_id)
+        elif school_id:
+            return get_school_blog_post_comments(post_id, school_id)
+        elif user_id:
+            return get_user_blog_post_comments(post_id, user_id)
+        elif section_id:
+            return get_section_blog_post_comments(post_id, section_id)
+        elif group_id:
+            return get_group_blog_post_comments(post_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_district_blog_post_comments(self, post_id, district_id):
         return [BlogPostComment(raw) for raw in self._get('districts/%s/posts/%s/comments' % (district_id, post_id))['comment']]
 
-    def get_school_blog_post_comments(self, school_id, post_id):
+    def get_school_blog_post_comments(self, post_id, school_id):
         return [BlogPostComment(raw) for raw in self._get('schools/%s/posts/%s/comments' % (school_id, post_id))['comment']]
 
-    def get_user_blog_post_comments(self, user_id, post_id):
+    def get_user_blog_post_comments(self, post_id, user_id):
         return [BlogPostComment(raw) for raw in self._get('users/%s/posts/%s/comments' % (user_id, post_id))['comment']]
 
-    def get_section_blog_post_comments(self, section_id, post_id):
+    def get_section_blog_post_comments(self, post_id, section_id):
         return [BlogPostComment(raw) for raw in self._get('sections/%s/posts/%s/comments' % (section_id, post_id))['comment']]
 
-    def get_group_blog_post_comments(self, group_id, post_id):
+    def get_group_blog_post_comments(self, post_id, group_id):
         return [BlogPostComment(raw) for raw in self._get('groups/%s/posts/%s/comments' % (group_id, post_id))['comment']]
 
 
-    def get_district_blog_post_comment(self, district_id, post_id, comment_id):
+    def get_blog_post_comment(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on individual blog post comments in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of the comment to fetch.
+        :param post_id: ID of the post on which the comment is written.
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPostComment objects recieved from API.
+        """
+        if district_id:
+            return get_district_blog_post_comment(comment_id, post_id, district_id)
+        elif school_id:
+            return get_school_blog_post_comment(comment_id, post_id, school_id)
+        elif user_id:
+            return get_user_blog_post_comment(comment_id, post_id, user_id)
+        elif section_id:
+            return get_section_blog_post_comment(comment_id, post_id, section_id)
+        elif group_id:
+            return get_group_blog_post_comment(comment_id, post_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_district_blog_post_comment(self, comment_id, post_id, district_id):
         return BlogPostComment(self._get('districts/%s/posts/%s/comments/%s' % (district_id, post_id, comment_id)))
 
-    def get_school_blog_post_comment(self, school_id, post_id, comment_id):
+    def get_school_blog_post_comment(self, comment_id, post_id, school_id):
         return BlogPostComment(self._get('schools/%s/posts/%s/comments/%s' % (school_id, post_id, comment_id)))
 
-    def get_user_blog_post_comment(self, user_id, post_id, comment_id):
+    def get_user_blog_post_comment(self, comment_id, post_id, user_id):
         return BlogPostComment(self._get('users/%s/posts/%s/comments/%s' % (user_id, post_id, comment_id)))
 
-    def get_section_blog_post_comment(self, section_id, post_id, comment_id):
+    def get_section_blog_post_comment(self, comment_id, post_id, section_id):
         return BlogPostComment(self._get('sections/%s/posts/%s/comments/%s' % (section_id, post_id, comment_id)))
 
-    def get_group_blog_post_comment(self, group_id, post_id, comment_id):
+    def get_group_blog_post_comment(self, comment_id, post_id, group_id):
         return BlogPostComment(self._get('groups/%s/posts/%s/comments/%s' % (group_id, post_id, comment_id)))
 
+
+    def get_blog_post_comment(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for deleting blog post comments in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of the comment to delete.
+        :param post_id: ID of the post on which the comment is written.
+        :param *_id: ID of realm in which to create event.
+        """
+        if district_id:
+            delete_district_blog_post_comment(comment_id, post_id, district_id)
+        elif school_id:
+            delete_school_blog_post_comment(comment_id, post_id, school_id)
+        elif user_id:
+            delete_user_blog_post_comment(comment_id, post_id, user_id)
+        elif section_id:
+            delete_section_blog_post_comment(comment_id, post_id, section_id)
+        elif group_id:
+            delete_group_blog_post_comment(comment_id, post_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_district_blog_post_comment(self, comment_id, post_id, district_id):
+        self._delete('districts/%s/posts/%s/comments/%s' % (district_id, post_id, comment_id))
+
+    def delete_school_blog_post_comment(self, comment_id, post_id, school_id):
+        self._delete('schools/%s/posts/%s/comments/%s' % (school_id, post_id, comment_id))
+
+    def delete_user_blog_post_comment(self, comment_id, post_id, user_id):
+        self._delete('users/%s/posts/%s/comments/%s' % (user_id, post_id, comment_id))
+
+    def delete_section_blog_post_comment(self, comment_id, post_id, section_id):
+        self._delete('sections/%s/posts/%s/comments/%s' % (section_id, post_id, comment_id))
+
+    def delete_group_blog_post_comment(self, comment_id, post_id, group_id):
+        self._delete('groups/%s/posts/%s/comments/%s' % (group_id, post_id, comment_id))
+
+
+    def get_discussions(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on all discussions in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPostComment objects recieved from API.
+        """
+        if district_id:
+            return get_district_discussions(district_id)
+        elif school_id:
+            return get_school_discussions(school_id)
+        elif section_id:
+            return get_section_discussions(section_id)
+        elif group_id:
+            return get_group_discussions(group_id)
+        else:
+            raise TypeError('Realm id property required.')
 
     def get_district_discussions(self, district_id):
         return [Discussion(raw) for raw in self._get('districts/%s/discussions' % district_id)['discussion']]
@@ -760,16 +905,37 @@ class Schoology:
         return [Discussion(raw) for raw in self._get('groups/%s/discussions' % group_id)['discussion']]
 
 
-    def get_district_discussion(self, district_id, discussion_id):
+    def get_discussion(self, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on individual blog post comments in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param discussion_id: ID of the post on which the comment is written.
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPostComment objects recieved from API.
+        """
+        if district_id:
+            return get_district_blog_post_comments(discussion_id, district_id)
+        elif school_id:
+            return get_school_blog_post_comments(discussion_id, school_id)
+        elif section_id:
+            return get_section_blog_post_comments(discussion_id, section_id)
+        elif group_id:
+            return get_group_blog_post_comments(discussion_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_district_discussion(self, discussion_id, district_id):
         return Discussion(self._get('districts/%s/discussions/%s' % (district_id, discussion_id)))
 
-    def get_school_discussion(self, school_id, discussion_id):
+    def get_school_discussion(self, discussion_id, school_id):
         return Discussion(self._get('schools/%s/discussions/%s' % (school_id, discussion_id)))
 
-    def get_section_discussion(self, section_id, discussion_id):
+    def get_section_discussion(self, discussion_id, section_id):
         return Discussion(self._get('sections/%s/discussions/%s' % (section_id, discussion_id)))
 
-    def get_group_discussion(self, group_id, discussion_id):
+    def get_group_discussion(self, discussion_id, group_id):
         return Discussion(self._get('groups/%s/discussions/%s' % (group_id, discussion_id)))
 
 
