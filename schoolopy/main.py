@@ -1160,6 +1160,51 @@ class Schoology:
         self._delete('groups/%s/discussions/%s/comments/%s' % (group_id, discussion_id, reply_id))
 
 
+    def create_update(self, update, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating an update in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param update: Update object to post.
+        :param *_id: ID of realm in which to create update.
+        """
+        if user_id:
+            create_district_update(update, district_id)
+        elif section_id:
+            create_school_update(update, school_id)
+        elif group_id:
+            create_group_update(update, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_update(update, district_id):
+        return Update(self._post('districts/%s/updates', update.json))
+
+    def create_section_update(update, section_id):
+        return Update(self._post('sections/%s/updates', update.json))
+
+    def create_group_update(update, group_id):
+        return Update(self._post('groups/%s/updates', update.json))
+
+
+    def get_updates(self, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting updates in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which updates are published.
+        """
+        if user_id:
+            get_user_updates(district_id)
+        elif section_id:
+            get_user_updates(section_id)
+        elif group_id:
+            get_user_updates(group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
     def get_user_updates(self, user_id):
         return [Update(raw) for raw in self._get('users/%s/updates' % user_id)['update']]
 
@@ -1182,14 +1227,87 @@ class Schoology:
         return [Update(raw) for raw in self._get('recent')['update']]
 
 
-    def get_user_update(self, user_id, update_id):
+    def get_updates(self, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting updates in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which updates are published.
+        """
+        if user_id:
+            get_user_update(update_id, district_id)
+        elif section_id:
+            get_section_update(update_id, section_id)
+        elif group_id:
+            get_group_update(update_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_user_update(self, update_id, user_id):
         return Update(self._get('users/%s/updates/%s' % (user_id, update_id)))
 
-    def get_section_update(self, section_id, update_id):
+    def get_section_update(self, update_id, section_id):
         return Update(self._get('sections/%s/updates/%s' % (section_id, update_id)))
 
-    def get_group_update(self, group_id, update_id):
+    def get_group_update(self, update_id, group_id):
         return Update(self._get('groups/%s/updates/%s' % (group_id, update_id)))
+
+
+    def delete_update(self, update_id, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for deleting an update in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param update_id: ID of update to delete.
+        :param *_id: ID of realm in which updates are published.
+        """
+        if user_id:
+            delete_user_update(update_id, district_id)
+        elif section_id:
+            delete_section_update(update_id, section_id)
+        elif group_id:
+            delete_group_update(update_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_user_update(self, update_id, user_id):
+        return Update(self._delete('users/%s/updates/%s' % (user_id, update_id)))
+
+    def delete_section_update(self, update_id, section_id):
+        return Update(self._delete('sections/%s/updates/%s' % (section_id, update_id)))
+
+    def delete_group_update(self, update_id, group_id):
+        return Update(self._delete('groups/%s/updates/%s' % (group_id, update_id)))
+
+
+    def update_update(self, update, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for updating an update in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param update: Update object to post.
+        :param *_id: ID of realm in which to create update.
+        """
+        if user_id:
+            return update_district_update(update, district_id)
+        elif section_id:
+            return update_school_update(update, school_id)
+        elif group_id:
+            return update_group_update(update, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def update_district_update(update, district_id):
+        return Update(self._put('districts/%s/updates', update.json))
+
+    def update_section_update(update, section_id):
+        return Update(self._put('sections/%s/updates', update.json))
+
+    def update_group_update(update, group_id):
+        return Update(self._put('groups/%s/updates', update.json))
 
 
     # TODO: Investigate whether we can get individual comments

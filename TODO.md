@@ -3,7 +3,8 @@
 * Add methods to POST objects
 * Test all methods, proofread
 * Standardize parameter order
-* Write docstrings
+* Write docstrings, check for issues in extant ones
+* Support attachments and URL parameters
 * Investigate removing `get_` prefix from data GETting methods for aesthetic purposes
 * Go through all pages of REST API documentation to make sure we didn't miss any endpoints
 * Support three-legged authentication
