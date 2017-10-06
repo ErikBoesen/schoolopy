@@ -886,7 +886,7 @@ class Schoology:
         self._delete('groups/%s/posts/%s/comments/%s' % (group_id, post_id, comment_id))
 
 
-    def get_discussions(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def get_discussions(self, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on all discussions in any realm.
 
@@ -919,7 +919,7 @@ class Schoology:
         return [Discussion(raw) for raw in self._get('groups/%s/discussions' % group_id)['discussion']]
 
 
-    def create_discussion(self, discussion, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def create_discussion(self, discussion, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for creating a discussion in any realm.
 
@@ -953,7 +953,7 @@ class Schoology:
         return Discussion(self._post('groups/%s/discussions/%s' % (group_id, discussion_id), discussion.json))
 
 
-    def get_discussion(self, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def get_discussion(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on individual discussion in any realm.
 
@@ -987,7 +987,7 @@ class Schoology:
         return Discussion(self._get('groups/%s/discussions/%s' % (group_id, discussion_id)))
 
 
-    def delete_discussion(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def delete_discussion(self, comment_id, post_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for deleting discussions in any realm.
 
@@ -1022,7 +1022,7 @@ class Schoology:
 
 
 
-    def create_discussion_reply(self, reply, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def create_discussion_reply(self, reply, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for creating discussion replies in any realm.
 
@@ -1056,7 +1056,7 @@ class Schoology:
         return DiscussionReply(self._post('groups/%s/discussions/%s/comments' % (group_id, discussion_id), reply.json))
 
 
-    def get_discussion_replies(self, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def get_discussion_replies(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on discussion replies in any realm.
 
@@ -1090,7 +1090,7 @@ class Schoology:
         return [DiscussionReply(raw) for raw in self._get('groups/%s/discussions/%s/comments' % (group_id, discussion_id))['comment']]
 
 
-    def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for getting individual discussion replies in any realm.
 
@@ -1126,7 +1126,7 @@ class Schoology:
         return DiscussionReply(self._get('groups/%s/discussions/%s/comments/%s' % (group_id, discussion_id, reply_id)))
 
 
-    def delete_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def delete_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for deleting blog post comments in any realm.
 
@@ -1140,8 +1140,6 @@ class Schoology:
             delete_district_discussion_reply(reply_id, discussion_id, district_id)
         elif school_id:
             delete_school_discussion_reply(reply_id, discussion_id, school_id)
-        elif user_id:
-            delete_user_discussion_reply(reply_id, discussion_id, user_id)
         elif section_id:
             delete_section_discussion_reply(reply_id, discussion_id, section_id)
         elif group_id:
@@ -1154,9 +1152,6 @@ class Schoology:
 
     def delete_school_discussion_reply(self, reply_id, discussion_id, school_id):
         self._delete('schools/%s/discussions/%s/comments/%s' % (school_id, discussion_id, reply_id))
-
-    def delete_user_discussion_reply(self, reply_id, discussion_id, user_id):
-        self._delete('users/%s/discussions/%s/comments/%s' % (user_id, discussion_id, reply_id))
 
     def delete_section_discussion_reply(self, reply_id, discussion_id, section_id):
         self._delete('sections/%s/discussions/%s/comments/%s' % (section_id, discussion_id, reply_id))
