@@ -1294,7 +1294,7 @@ class Schoology:
         if user_id:
             return update_district_update(update, district_id)
         elif section_id:
-            return update_school_update(update, school_id)
+            return update_section_update(update, section_id)
         elif group_id:
             return update_group_update(update, group_id)
         else:
@@ -1323,7 +1323,7 @@ class Schoology:
         if user_id:
             return create_user_update_comment(comment, update_id, district_id)
         elif section_id:
-            return create_school_update_comment(comment, update_id, school_id)
+            return create_section_update_comment(comment, update_id, section_id)
         elif group_id:
             return create_group_update_comment(comment, update_id, group_id)
         else:
@@ -1351,7 +1351,7 @@ class Schoology:
         if user_id:
             return get_user_update_comments(update_id, district_id)
         elif section_id:
-            return get_school_update_comments(update_id, school_id)
+            return get_section_update_comments(update_id, section_id)
         elif group_id:
             return get_group_update_comments(update_id, group_id)
         else:
@@ -1380,7 +1380,7 @@ class Schoology:
         if user_id:
             return get_user_update_comment(comment_id, update_id, district_id)
         elif section_id:
-            return get_school_update_comment(comment_id, update_id, school_id)
+            return get_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
             return get_group_update_comment(comment_id, update_id, group_id)
         else:
@@ -1409,7 +1409,7 @@ class Schoology:
         if user_id:
             delete_user_update_comment(comment_id, update_id, district_id)
         elif section_id:
-            delete_school_update_comment(comment_id, update_id, school_id)
+            delete_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
             delete_group_update_comment(comment_id, update_id, group_id)
         else:
@@ -1427,7 +1427,121 @@ class Schoology:
     # TODO: Implement Reminder requests
     # It's unclear what endpoints we should use
 
-    # TODO: Support Media Albums
+    def create_media_album(self, album, section_id=None, group_id=None):
+        """
+        Helper function for getting data on an individual update comment in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param album: Album object to post to API.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if section_id:
+            return create_section_media_album(album, section)
+        elif group_id:
+            return create_group_media_album(album, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_section_media_album(self, album, section_id):
+        return MediaAlbum(self._post('sections/%s/albums' % section_id, album.json))
+
+    def create_group_media_album(self, album, group_id):
+        return MediaAlbum(self._post('groups/%s/albums' % group_id, album.json))
+
+
+    def get_media_albums(self, section_id=None, group_id=None):
+        """
+        Helper function for getting data on media albums in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create update comment.
+        :return: List of MediaAlbum objects.
+        """
+        if section_id:
+            return get_school_media_albums(section_id)
+        elif group_id:
+            return get_group_media_albums(group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_section_media_albums(self, section_id):
+        return [MediaAlbum(raw) for raw in self._get('sections/%s/albums' % section_id)['album']]
+
+    def get_group_media_albums(self, group_id):
+        return [MediaAlbum(raw) for raw in self._get('groups/%s/albums' % group_id)['album']]
+
+
+    def get_media_album(self, album_id, section_id=None, group_id=None):
+        """
+        Helper function for getting data on an individual media album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm from which to get album.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            return get_section_media_album(album_id, section_id)
+        elif group_id:
+            return get_group_media_album(album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_section_media_album(self, album_id, section_id):
+        return MediaAlbum(self._get('sections/%s/albums/%s' % (section_id, album_id)))
+
+    def get_group_media_album(self, album_id, group_id):
+        return MediaAlbum(self._get('groups/%s/albums/%s' % (group_id, album_id)))
+
+
+    def update_media_album(self, album, section_id=None, group_id=None):
+        """
+        Helper function for updating an individual media album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm from which to get album.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            return update_section_media_album(album_id, section_id)
+        elif group_id:
+            return update_group_media_album(album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def update_section_media_album(self, album_id, section_id):
+        return MediaAlbum(self._get('sections/%s/albums/%s' % (section_id, album_id)))
+
+    def update_group_media_album(self, album_id, group_id):
+        return MediaAlbum(self._get('groups/%s/albums/%s' % (group_id, album_id)))
+
+
+    def delete_media_album(self, album, section_id=None, group_id=None):
+        """
+        Helper function for deleting an individual media album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm from which to delete album.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            delete_section_media_album(album_id, section_id)
+        elif group_id:
+            delete_group_media_album(album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_section_media_album(self, album_id, section_id):
+        self._delete('sections/%s/albums/%s' % (section_id, album_id)))
+
+    def delete_group_media_album(self, album_id, group_id):
+        self._delete('groups/%s/albums/%s' % (group_id, album_id)))
+
+
     # TODO: Support Documents
     # TODO: Support Grading Scales, Rubrics, Categories, and Groups
 
