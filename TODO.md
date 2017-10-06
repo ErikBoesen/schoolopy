@@ -3,6 +3,7 @@
 * Add methods to POST objects
 * Test all methods, proofread
 * Write docstrings
+* Investigate removing `get_` prefix from data GETting methods for aesthetic purposes
 * Go through all pages of REST API documentation to make sure we didn't miss any endpoints
 * Support three-legged authentication
 * Implement event triggers and other parts of API other than REST

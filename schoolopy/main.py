@@ -451,7 +451,7 @@ class Schoology:
 
     def update_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for updating individual event in any realm.
+        Helper function for updating individual events in any realm.
 
         Exactly one _id property must be specified by name in calls to this method.
 
@@ -471,8 +471,119 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def update_district_event(self, district_id, event_id):
-        self._put('districts/%s/events/')
+    def update_district_event(self, event, district_id):
+        self._put('districts/%s/events/%s' % (district_id, event.id), event.json)
+
+    def update_school_event(self, event, school_id):
+        self._put('schools/%s/events/%s' % (school_id, event.id), event.json)
+
+    def update_user_event(self, event, user_id):
+        self._put('users/%s/events/%s' % (user_id, event.id), event.json)
+
+    def update_section_event(self, event, section_id):
+        self._put('sections/%s/events/%s' % (section_id, event.id), event.json)
+
+    def update_group_event(self, event, group_id):
+        self._put('groups/%s/events/%s' % (group_id, event.id), event.json)
+
+    def delete_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for deleting individual events in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param event_id: ID of event to delete.
+        :param *_id: ID of realm in which to create event.
+        """
+        if district_id:
+            delete_district_event(event_id, district_id)
+        elif school_id:
+            delete_school_event(event_id, school_id)
+        elif user_id:
+            delete_user_event(event_id, user_id)
+        elif section_id:
+            delete_section_event(event_id, section_id)
+        elif group_id:
+            delete_group_event(event_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_district_event(self, event_id, district_id):
+        self._delete('districts/%s/events/%s' % (district_id, event_id), event.json)
+
+    def delete_school_event(self, event_id, school_id):
+        self._delete('schools/%s/events/%s' % (school_id, event_id), event.json)
+
+    def delete_user_event(self, event_id, user_id):
+        self._delete('users/%s/events/%s' % (user_id, event_id), event.json)
+
+    def delete_section_event(self, event_id, section_id):
+        self._delete('sections/%s/events/%s' % (section_id, event_id), event.json)
+
+    def delete_group_event(self, event_id, group_id):
+        self._delete('groups/%s/events/%s' % (group_id, event_id), event.json)
+
+
+    def create_blog_post(self, post, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating blog posts in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param post: BlogPost object to post in the given realm.
+        :param *_id: ID of realm in which to create event.
+        :return: BlogPost object recieved from API.
+        """
+        if district_id:
+            return create_district_blog_post(post, district_id)
+        elif school_id:
+            return create_school_blog_post(post, school_id)
+        elif user_id:
+            return create_user_blog_post(post, user_id)
+        elif section_id:
+            return create_section_blog_post(post, section_id)
+        elif group_id:
+            return create_group_blog_post(post, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_blog_post(self, post, district_id):
+        return BlogPost(self._post('districts/%s/posts' % district_id, post.json))
+
+    def create_school_blog_post(self, post, school_id):
+        return BlogPost(self._post('schools/%s/posts' % school_id, post.json))
+
+    def create_user_blog_post(self, post, user_id):
+        return BlogPost(self._post('users/%s/posts' % user_id, post.json))
+
+    def create_section_blog_post(self, post, section_id):
+        return BlogPost(self._post('sections/%s/posts' % section_id, post.json))
+
+    def create_group_blog_post(self, post, group_id):
+        return BlogPost(self._post('groups/%s/posts' % group_id, post.json))
+
+
+    def get_blog_posts(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating blog posts in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPost objects recieved from API.
+        """
+        if district_id:
+            return get_district_blog_posts(district_id)
+        elif school_id:
+            return get_school_blog_posts(school_id)
+        elif user_id:
+            return get_user_blog_posts(user_id)
+        elif section_id:
+            return get_section_blog_posts(section_id)
+        elif group_id:
+            return get_group_blog_posts(group_id)
+        else:
+            raise TypeError('Realm id property required.')
 
     def get_district_blog_posts(self, district_id):
         return [BlogPost(raw) for raw in self._get('districts/%s/posts' % district_id)['post']]
@@ -490,6 +601,28 @@ class Schoology:
         return [BlogPost(raw) for raw in self._get('groups/%s/posts' % group_id)['post']]
 
 
+    def get_blog_post(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating blog posts in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPost objects recieved from API.
+        """
+        if district_id:
+            return get_district_blog_posts(post_id, district_id)
+        elif school_id:
+            return get_school_blog_posts(post_id, school_id)
+        elif user_id:
+            return get_user_blog_posts(post_id, user_id)
+        elif section_id:
+            return get_section_blog_posts(post_id, section_id)
+        elif group_id:
+            return get_group_blog_posts(post_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
     def get_district_blog_post(self, district_id, post_id):
         return BlogPost(self._get('districts/%s/posts/%s' % (district_id, post_id)))
 
@@ -504,6 +637,82 @@ class Schoology:
 
     def get_group_blog_post(self, group_id, post_id):
         return BlogPost(self._get('groups/%s/posts/%s' % (group_id, post_id)))
+
+
+    def update_blog_post(self, post, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating blog posts in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPost objects recieved from API.
+        """
+        if district_id:
+            update_district_blog_post(post, district_id)
+        elif school_id:
+            update_school_blog_post(post, school_id)
+        elif user_id:
+            update_user_blog_post(post, user_id)
+        elif section_id:
+            update_section_blog_post(post, section_id)
+        elif group_id:
+            update_group_blog_post(post, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def update_district_blog_post(self, post, district_id):
+        self._put('districts/%s/posts/%s' % (district_id, post.id), post.json)
+
+    def update_school_blog_post(self, post, school_id):
+        self._put('schools/%s/posts/%s' % (school_id, post.id), post.json)
+
+    def update_user_blog_post(self, post, user_id):
+        self._put('users/%s/posts/%s' % (user_id, post.id), post.json)
+
+    def update_section_blog_post(self, post, section_id):
+        self._put('sections/%s/posts/%s' % (section_id, post.id), post.json)
+
+    def update_group_blog_post(self, post, group_id):
+        self._put('groups/%s/posts/%s' % (group_id, post.id), post.json)
+
+
+    def delete_blog_post(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for deleting blog posts in any realm.
+
+        Exactly one _id property must be specified by name in calls to this method.
+
+        :param *_id: ID of realm in which to create event.
+        :return: List of BlogPost objects recieved from API.
+        """
+        if district_id:
+            delete_district_blog_post(post_id, district_id)
+        elif school_id:
+            delete_school_blog_post(post_id, school_id)
+        elif user_id:
+            delete_user_blog_post(post_id, user_id)
+        elif section_id:
+            delete_section_blog_post(post_id, section_id)
+        elif group_id:
+            delete_group_blog_post(post_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_district_blog_post(self, post_id, district_id):
+        self._delete('districts/%s/posts/%s' % (district_id, post_id))
+
+    def delete_school_blog_post(self, post_id, school_id):
+        self._delete('schools/%s/posts/%s' % (school_id, post_id))
+
+    def delete_user_blog_post(self, post_id, user_id):
+        self._delete('users/%s/posts/%s' % (user_id, post_id))
+
+    def delete_section_blog_post(self, post_id, section_id):
+        self._delete('sections/%s/posts/%s' % (section_id, post_id))
+
+    def delete_group_blog_post(self, post_id, group_id):
+        self._delete('groups/%s/posts/%s' % (group_id, post_id))
 
 
     def get_district_blog_post_comments(self, district_id, post_id):
