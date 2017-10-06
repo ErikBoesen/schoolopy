@@ -1310,16 +1310,119 @@ class Schoology:
         return Update(self._put('groups/%s/updates', update.json))
 
 
-    # TODO: Investigate whether we can get individual comments
-    def get_user_update_comments(self, user_id, update_id):
+    def create_update_comment(self, comment, update_id, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating a comment on an update in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment: UpdateComment object to post.
+        :param update_id: ID of update on which to create comment.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if user_id:
+            return create_user_update_comment(comment, update_id, district_id)
+        elif section_id:
+            return create_school_update_comment(comment, update_id, school_id)
+        elif group_id:
+            return create_group_update_comment(comment, update_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_update(update, district_id):
+        return Update(self._post('districts/%s/updates', comment.json))
+
+    def create_section_update(update, section_id):
+        return Update(self._post('sections/%s/updates', comment.json))
+
+    def create_group_update(update, group_id):
+        return Update(self._post('groups/%s/updates', comment.json))
+
+
+    def get_update_comments(self, comment, update_id, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating a comment on an update in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param update_id: ID of update from which to get comments.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if user_id:
+            return get_user_update_comments(update_id, district_id)
+        elif section_id:
+            return get_school_update_comments(update_id, school_id)
+        elif group_id:
+            return get_group_update_comments(update_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_user_update_comments(self, update_id, user_id):
         return [UpdateComment(raw) for raw in self._get('users/%s/updates/%s/comments' % (user_id, update_id))['comment']]
 
-    def get_section_update_comments(self, section_id, update_id):
+    def get_section_update_comments(self, update_id, section_id):
         return [UpdateComment(raw) for raw in self._get('sections/%s/updates/%s/comments' % (section_id, update_id))['comment']]
 
-    def get_group_update_comments(self, group_id, update_id):
+    def get_group_update_comments(self, update_id, group_id):
         return [UpdateComment(raw) for raw in self._get('groups/%s/updates/%s/comments' % (group_id, update_id))['comment']]
 
+
+    def get_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on an individual update comment in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of comment on which to get data.
+        :param update_id: ID of update on which to create comment.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if user_id:
+            return get_user_update_comment(comment_id, update_id, district_id)
+        elif section_id:
+            return get_school_update_comment(comment_id, update_id, school_id)
+        elif group_id:
+            return get_group_update_comment(comment_id, update_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_user_update_comment(self, comment_id, update_id, user_id):
+        return UpdateComment(self._get('users/%s/updates/%s/comments/%s' % (user_id, update_id, comment_id)))
+
+    def get_section_update_comment(self, comment_id, update_id, section_id):
+        return UpdateComment(self._get('sections/%s/updates/%s/comments/%s' % (section_id, update_id, comment_id)))
+
+    def get_group_update_comment(self, comment_id, update_id, group_id):
+        return UpdateComment(self._get('groups/%s/updates/%s/comments/%s' % (group_id, update_id, comment_id)))
+
+
+    def delete_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on an individual update comment in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of comment on which to get data.
+        :param update_id: ID of update on which to create comment.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if user_id:
+            delete_user_update_comment(comment_id, update_id, district_id)
+        elif section_id:
+            delete_school_update_comment(comment_id, update_id, school_id)
+        elif group_id:
+            delete_group_update_comment(comment_id, update_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_user_update_comment(self, comment_id, update_id, user_id):
+        self._delete('users/%s/updates/%s/comments/%s' % (user_id, update_id, comment_id))
+
+    def delete_section_update_comment(self, comment_id, update_id, section_id):
+        self._delete('sections/%s/updates/%s/comments/%s' % (section_id, update_id, comment_id))
+
+    def delete_group_update_comment(self, comment_id, update_id, group_id):
+        self._delete('groups/%s/updates/%s/comments/%s' % (group_id, update_id, comment_id))
 
     # TODO: Implement Reminder requests
     # It's unclear what endpoints we should use
