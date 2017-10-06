@@ -197,6 +197,30 @@ class Schoology:
         """
         return Section(self._get('sections/%s' % section_id))
 
+
+    def create_enrollment(self, enrollment, section_id=None, group_id=None):
+        """
+        Helper function for creating an enrollment in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param enrollment: Enrollment object to post to API.
+        :param *_id: ID of realm from which to get events.
+        :return: Enrollment object recieved from API.
+        """
+        if section_id:
+            return create_section_enrollments(enrollment, section_id)
+        elif group_id:
+            return create_group_enrollments(enrollment, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_section_enrollment(self, enrollment, section_id):
+        return Enrollment(self._post('sections/%s/enrollments' % section_id, enrollment.json))
+
+    def create_group_enrollment(self, enrollment, group_id):
+        return Enrollment(self._post('groups/%s/enrollments' % group_id, enrollment.json))
+
     def get_enrollments(self, section_id=None, group_id=None):
         """
         Helper function to get enrollments in any realm. Realm will be decided based on named parameters passed.
@@ -220,13 +244,6 @@ class Schoology:
     def get_group_enrollments(self, group_id):
         return [Enrollment(raw) for raw in self._get('groups/%s/enrollments' % group_id)['enrollments']]
 
-    # TODO: Create generic create_enrollment method
-
-    def create_section_enrollment(self, section_id, user_id, admin=False, status=1):
-        return Enrollment(self._post('sections/%s/enrollments' % section_id, {'uid': user_id, 'admin': int(admin), 'status': status}))
-
-    def create_group_enrollment(self, group_id, user_id, admin=False, status=1):
-        return Enrollment(self._post('groups/%s/enrollments' % group_id, {'uid': user_id, 'admin': int(admin), 'status': status}))
 
     # TODO: Do we need to provide the ID of the realm?
     def join_section(self, access_code):
@@ -236,7 +253,25 @@ class Schoology:
         return Enrollment(self._post('sections/accesscode' % access_code, {'access_code': access_code}))
 
 
-    def create_section_enrollments(self, section_id, enrollments):
+    def create_enrollments(self, enrollments, section_id=None, group_id=None):
+        """
+        Helper function to create multiple enrollments in any realm. Realm will be decided based on named parameters passed.
+
+        You must provide either a section_id or group_id, and name your parameters.
+
+        :param enrollments: List of Enrollment objects to post to API.
+        :param section_id: ID of section whose enrollments to get.
+        :param group_id: ID of group whose enrollments to get.
+        :return: List of User objects.
+        """
+        if section_id:
+            return create_section_enrollments(enrollments, section_id)
+        elif group_id:
+            return create_group_enrollments(enrollments, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_section_enrollments(self, enrollments, section_id):
         """
         Create section enrollments in bulk.
 
@@ -246,7 +281,7 @@ class Schoology:
         """
         return [Enrollment(raw) for raw in self._post('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
 
-    def create_group_enrollments(self, group_id, enrollments):
+    def create_group_enrollments(self, enrollments, group_id):
         """
         Create group enrollments in bulk.
 
@@ -256,7 +291,7 @@ class Schoology:
         """
         return [Enrollment(raw) for raw in self._post('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
 
-    def update_enrollment(self, group_id=None, section_id=None, enrollment):
+    def update_enrollment(self, enrollment, group_id=None, section_id=None):
         """
         Helper function for updating an enrollment.
 
@@ -274,19 +309,19 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def update_section_enrollment(self, section_id, enrollment):
+    def update_section_enrollment(self, enrollment, section_id):
         return update_section_enrollments(section_id, [enrollment])
 
-    def update_group_enrollment(self, group_id, enrollment):
+    def update_group_enrollment(self, enrollment, group_id):
         return update_group_enrollments(group_id, [enrollment])
 
-    def update_section_enrollments(self, section_id, enrollments):
+    def update_section_enrollments(self, enrollments, section_id):
         return [Enrollment(raw) for raw in self._put('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
 
-    def update_group_enrollments(self, group_id, enrollments):
+    def update_group_enrollments(self, enrollments, group_id):
         return [Enrollment(raw) for raw in self._put('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json for enrollment in enrollments]}})]
 
-    def delete_enrollment(self, section_id=None, group_id=None, enrollment_id):
+    def delete_enrollment(self, enrollment_id, section_id=None, group_id=None):
         """
         Helper function for deleting an enrollment in any realm.
 
@@ -303,34 +338,14 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def delete_section_enrollment(self, section_id, enrollment_id):
+    def delete_section_enrollment(self, enrollment_id, section_id):
         delete_section_enrollments(section_id, [enrollment_id])
 
-    def delete_group_enrollment(self, group_id, enrollment_id):
+    def delete_group_enrollment(self, enrollment_id, group_id):
         delete_group_enrollments(group_id, [enrollment_id])
 
-    def delete_enrollments(self, section_id=None, group_id=None, enrollment_ids):
-        """
-        Helper function for deleting an enrollment in any realm.
-
-        Either group_id or section_id must be specified by name in calls to this method.
-
-        :param section_id: ID of section from which to delete enrollment.
-        :param group_id: ID of group from which to delete enrollment.
-        :param enrollment_id: List of IDs of enrollments to delete.
-        """
-        if section_id:
-            return delete_section_enrollments(section_id, enrollment_ids)
-        elif group_id:
-            return delete_group_enrollments(group_id, enrollment_ids)
-        else:
-            raise TypeError('Realm id property required.')
-
-    def delete_section_enrollments(self, section_id, enrollment_ids):
-        self._delete('sections?enrollment_ids=' + ','.join(enr))
-
-    def delete_group_enrollments(self, group_id, enrollment_ids):
-        self._delete('groups?enrollment_ids=' + ','.join(enr))
+    def delete_enrollments(self, enrollment_ids):
+        self._delete('enrollments?enrollment_ids=' + ','.join(enr))
 
     # Course enrollments imports not implemented, similar effect can be obtained
 
@@ -738,21 +753,20 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def create_district_blog_post(self, comment, post_id, district_id):
-        return BlogPost(self._post('districts/%s/posts/%s/comments' % (district_id, post_id), comment.json))
+    def create_district_blog_post_comment(self, comment, post_id, district_id):
+        return BlogPostComment(self._post('districts/%s/posts/%s/comments' % (district_id, post_id), comment.json))
 
-    def create_school_blog_post(self, comment, post_id, school_id):
-        return BlogPost(self._post('schools/%s/posts/%s/comments' % (school_id, post_id), comment.json))
+    def create_school_blog_post_comment(self, comment, post_id, school_id):
+        return BlogPostComment(self._post('schools/%s/posts/%s/comments' % (school_id, post_id), comment.json))
 
-    def create_user_blog_post(self, comment, post_id, user_id):
-        return BlogPost(self._post('users/%s/posts/%s/comments' % (user_id, post_id), comment.json))
+    def create_user_blog_post_comment(self, comment, post_id, user_id):
+        return BlogPostComment(self._post('users/%s/posts/%s/comments' % (user_id, post_id), comment.json))
 
-    def create_section_blog_post(self, comment, post_id, section_id):
-        return BlogPost(self._post('sections/%s/posts/%s/comments' % (section_id, post_id), comment.json))
+    def create_section_blog_post_comment(self, comment, post_id, section_id):
+        return BlogPostComment(self._post('sections/%s/posts/%s/comments' % (section_id, post_id), comment.json))
 
-    def create_group_blog_post(self, comment, post_id, group_id):
-        return BlogPost(self._post('groups/%s/posts/%s/comments' % (group_id, post_id), comment.json))
-
+    def create_group_blog_post_comment(self, comment, post_id, group_id):
+        return BlogPostComment(self._post('groups/%s/posts/%s/comments' % (group_id, post_id), comment.json))
 
 
     def get_blog_post_comments(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
@@ -833,7 +847,7 @@ class Schoology:
         return BlogPostComment(self._get('groups/%s/posts/%s/comments/%s' % (group_id, post_id, comment_id)))
 
 
-    def get_blog_post_comment(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def delete_blog_post_comment(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for deleting blog post comments in any realm.
 
@@ -905,24 +919,58 @@ class Schoology:
         return [Discussion(raw) for raw in self._get('groups/%s/discussions' % group_id)['discussion']]
 
 
-    def get_discussion(self, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def create_discussion(self, discussion, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on individual blog post comments in any realm.
+        Helper function for creating a discussion in any realm.
 
         Exactly one realm id property must be specified by name in calls to this method.
 
-        :param discussion_id: ID of the post on which the comment is written.
+        :param discussion: Discussion object to post.
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPostComment objects recieved from API.
         """
         if district_id:
-            return get_district_blog_post_comments(discussion_id, district_id)
+            return create_district_discussion(discussion, district_id)
         elif school_id:
-            return get_school_blog_post_comments(discussion_id, school_id)
+            return create_school_discussion(discussion, school_id)
         elif section_id:
-            return get_section_blog_post_comments(discussion_id, section_id)
+            return create_section_discussion(discussion, section_id)
         elif group_id:
-            return get_group_blog_post_comments(discussion_id, group_id)
+            return create_group_discussion(discussion, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_discussion(self, discussion, district_id):
+        return Discussion(self._post('districts/%s/discussions/%s' % (district_id, discussion_id), discussion.json))
+
+    def create_school_discussion(self, discussion, school_id):
+        return Discussion(self._post('schools/%s/discussions/%s' % (school_id, discussion_id), discussion.json))
+
+    def create_section_discussion(self, discussion, section_id):
+        return Discussion(self._post('sections/%s/discussions/%s' % (section_id, discussion_id), discussion.json))
+
+    def create_group_discussion(self, discussion, group_id):
+        return Discussion(self._post('groups/%s/discussions/%s' % (group_id, discussion_id), discussion.json))
+
+
+    def get_discussion(self, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on individual discussion in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param discussion_id: ID of the discussion on which to get data.
+        :param *_id: ID of realm from which to get discussion.
+        :return: Discussion object recieved from API.
+        """
+        if district_id:
+            return get_district_discussion(discussion_id, district_id)
+        elif school_id:
+            return get_school_discussion(discussion_id, school_id)
+        elif section_id:
+            return get_section_discussion(discussion_id, section_id)
+        elif group_id:
+            return get_group_discussion(discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -939,6 +987,96 @@ class Schoology:
         return Discussion(self._get('groups/%s/discussions/%s' % (group_id, discussion_id)))
 
 
+    def delete_discussion(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for deleting discussions in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of the comment to delete.
+        :param post_id: ID of the post on which the comment is written.
+        :param *_id: ID of realm in which to create event.
+        """
+        if district_id:
+            delete_district_blog_post_comment(discussion_id, district_id)
+        elif school_id:
+            delete_school_blog_post_comment(discussion_id, school_id)
+        elif section_id:
+            delete_section_blog_post_comment(discussion_id, section_id)
+        elif group_id:
+            delete_group_blog_post_comment(discussion_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_district_discussion(self, discussion_id, district_id):
+        self._delete('districts/%s/discussions/%s' % (district_id, discussion_id))
+
+    def delete_school_discussion(self, discussion_id, school_id):
+        self._delete('schools/%s/discussions/%s' % (school_id, discussion_id))
+
+    def delete_section_discussion(self, discussion_id, section_id):
+        self._delete('sections/%s/discussions/%s' % (section_id, discussion_id))
+
+    def delete_group_discussion(self, discussion_id, group_id):
+        self._delete('groups/%s/discussions/%s' % (group_id, discussion_id))
+
+
+
+    def create_discussion_reply(self, reply, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for creating discussion replies in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param reply: DiscussionReply object to post on the discussion with the given ID.
+        :param *_id: ID of realm in which discussion resides.
+        :return: BlogPost object recieved from API.
+        """
+        if district_id:
+            return create_district_discussion_reply(reply, discussion_id, district_id)
+        elif school_id:
+            return create_school_discussion_reply(reply, discussion_id, school_id)
+        elif section_id:
+            return create_section_discussion_reply(reply, discussion_id, section_id)
+        elif group_id:
+            return create_group_discussion_reply(reply, discussion_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_district_discussion_reply(self, reply, discussion_id, district_id):
+        return DiscussionReply(self._post('districts/%s/discussions/%s/comments' % (district_id, discussion_id), reply.json))
+
+    def create_school_discussion_reply(self, reply, discussion_id, school_id):
+        return DiscussionReply(self._post('schools/%s/discussions/%s/comments' % (school_id, discussion_id), reply.json))
+
+    def create_section_discussion_reply(self, reply, discussion_id, section_id):
+        return DiscussionReply(self._post('sections/%s/discussions/%s/comments' % (section_id, discussion_id), reply.json))
+
+    def create_group_discussion_reply(self, reply, discussion_id, group_id):
+        return DiscussionReply(self._post('groups/%s/discussions/%s/comments' % (group_id, discussion_id), reply.json))
+
+
+    def get_discussion_replies(self, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting data on discussion replies in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param reply: DiscussionReply object to post on the discussion with the given ID.
+        :param *_id: ID of realm in which discussion resides.
+        :return: List of DiscussionReply objects recieved from API.
+        """
+        if district_id:
+            return get_district_discussion_replies(discussion_id, district_id)
+        elif school_id:
+            return get_school_discussion_replies(discussion_id, school_id)
+        elif section_id:
+            return get_section_discussion_replies(discussion_id, section_id)
+        elif group_id:
+            return get_group_discussion_replies(discussion_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
     def get_district_discussion_replies(self, district_id, discussion_id):
         return [DiscussionReply(raw) for raw in self._get('districts/%s/discussions/%s/comments' % (district_id, discussion_id))['comment']]
 
@@ -952,6 +1090,29 @@ class Schoology:
         return [DiscussionReply(raw) for raw in self._get('groups/%s/discussions/%s/comments' % (group_id, discussion_id))['comment']]
 
 
+    def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for getting individual discussion replies in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of the reply to get.
+        :param discussion_id: ID of the discussion on which the reply is written.
+        :param *_id: ID of realm in which to create event.
+        """
+        if district_id:
+            return get_district_discussion_reply(reply_id, discussion_id, district_id)
+        elif school_id:
+            return get_school_discussion_reply(reply_id, discussion_id, school_id)
+        elif user_id:
+            return get_user_discussion_reply(reply_id, discussion_id, user_id)
+        elif section_id:
+            return get_section_discussion_reply(reply_id, discussion_id, section_id)
+        elif group_id:
+            return get_group_discussion_reply(reply_id, discussion_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
     def get_district_discussion_reply(self, district_id, discussion_id, reply_id):
         return DiscussionReply(self._get('districts/%s/discussions/%s/comments/%s' % (district_id, discussion_id, reply_id)))
 
@@ -963,6 +1124,45 @@ class Schoology:
 
     def get_group_discussion_reply(self, group_id, discussion_id, reply_id):
         return DiscussionReply(self._get('groups/%s/discussions/%s/comments/%s' % (group_id, discussion_id, reply_id)))
+
+
+    def delete_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+        """
+        Helper function for deleting blog post comments in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param comment_id: ID of the comment to delete.
+        :param post_id: ID of the post on which the comment is written.
+        :param *_id: ID of realm in which to create event.
+        """
+        if district_id:
+            delete_district_discussion_reply(reply_id, discussion_id, district_id)
+        elif school_id:
+            delete_school_discussion_reply(reply_id, discussion_id, school_id)
+        elif user_id:
+            delete_user_discussion_reply(reply_id, discussion_id, user_id)
+        elif section_id:
+            delete_section_discussion_reply(reply_id, discussion_id, section_id)
+        elif group_id:
+            delete_group_discussion_reply(reply_id, discussion_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_district_discussion_reply(self, reply_id, discussion_id, district_id):
+        self._delete('districts/%s/discussions/%s/comments/%s' % (district_id, discussion_id, reply_id))
+
+    def delete_school_discussion_reply(self, reply_id, discussion_id, school_id):
+        self._delete('schools/%s/discussions/%s/comments/%s' % (school_id, discussion_id, reply_id))
+
+    def delete_user_discussion_reply(self, reply_id, discussion_id, user_id):
+        self._delete('users/%s/discussions/%s/comments/%s' % (user_id, discussion_id, reply_id))
+
+    def delete_section_discussion_reply(self, reply_id, discussion_id, section_id):
+        self._delete('sections/%s/discussions/%s/comments/%s' % (section_id, discussion_id, reply_id))
+
+    def delete_group_discussion_reply(self, reply_id, discussion_id, group_id):
+        self._delete('groups/%s/discussions/%s/comments/%s' % (group_id, discussion_id, reply_id))
 
 
     def get_user_updates(self, user_id):
