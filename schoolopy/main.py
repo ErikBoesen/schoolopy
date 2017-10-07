@@ -1780,9 +1780,28 @@ class Schoology:
         :param section_id: ID of section whose grading scale to get data on.
         :return: GradingScale object.
         """
-        return GradingScale(self._get('sections/%s/grading_scales'))
+        return GradingScale(self._get('sections/%s/grading_scales' % section_id))
 
-    # TODO: Support Rubrics, Categories, and Groups
+
+    def get_rubrics(self, section_id):
+        """
+        Get list of rubrics used in a given course section.
+
+        :param section_id: ID of section from which to get rubrics.
+        :return: List of Rubric objects.
+        """
+        return [Rubric(raw) for raw in self._get('sections/%s/grading_rubrics' % section_id)['grading_rubric']]
+
+    def get_rubric(self, rubric_id, section_id):
+        """
+        Get data on an individual rubric.
+
+        :param rubric_id: ID of rubric on which to get data.
+        :param section_id: ID of section in which rubric is used.
+        """
+        return Rubric(self._get('sections/%s/grading_rubrics/%s' % (section_id, rubric_id)))
+
+    # TODO: Support Categories, and Groups
 
 
     def get_assignments(self, section_id):
