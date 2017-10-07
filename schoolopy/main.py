@@ -1770,7 +1770,19 @@ class Schoology:
     def delete_section_document(self, document_id, section_id):
         self._put('sections/%s/documents/%s' % (section_id, document_id))
 
-    # TODO: Support Grading Scales, Rubrics, Categories, and Groups
+
+    def get_grading_scale(self, section_id):
+        """
+        Get data on the grading scale used in a course section.
+
+        The documentation on this endpoint is incorrect, a single object is returned rather than a list.
+
+        :param section_id: ID of section whose grading scale to get data on.
+        :return: GradingScale object.
+        """
+        return GradingScale(self._get('sections/%s/grading_scales'))
+
+    # TODO: Support Rubrics, Categories, and Groups
 
 
     def get_assignments(self, section_id):
