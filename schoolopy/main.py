@@ -209,9 +209,9 @@ class Schoology:
         :return: Enrollment object recieved from API.
         """
         if section_id:
-            return create_section_enrollments(enrollment, section_id)
+            return self.create_section_enrollments(enrollment, section_id)
         elif group_id:
-            return create_group_enrollments(enrollment, group_id)
+            return self.create_group_enrollments(enrollment, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -232,9 +232,9 @@ class Schoology:
         :return: List of User objects.
         """
         if section_id:
-            return get_section_enrollments(section_id)
+            return self.get_section_enrollments(section_id)
         elif group_id:
-            return get_group_enrollments(group_id)
+            return self.get_group_enrollments(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -265,9 +265,9 @@ class Schoology:
         :return: List of User objects.
         """
         if section_id:
-            return create_section_enrollments(enrollments, section_id)
+            return self.create_section_enrollments(enrollments, section_id)
         elif group_id:
-            return create_group_enrollments(enrollments, group_id)
+            return self.create_group_enrollments(enrollments, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -303,9 +303,9 @@ class Schoology:
         :return: List of Enrollment objects recieved from API.
         """
         if section_id:
-            return update_section_enrollment(section_id, enrollment)
+            return self.update_section_enrollment(section_id, enrollment)
         elif group_id:
-            return update_group_enrollment(group_id, enrollment)
+            return self.update_group_enrollment(group_id, enrollment)
         else:
             raise TypeError('Realm id property required.')
 
@@ -332,9 +332,9 @@ class Schoology:
         :param enrollment_id: ID of enrollment to delete.
         """
         if section_id:
-            return delete_section_enrollment(section_id, enrollment_id)
+            return self.delete_section_enrollment(section_id, enrollment_id)
         elif group_id:
-            return delete_group_enrollment(group_id, enrollment_id)
+            return self.delete_group_enrollment(group_id, enrollment_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -359,15 +359,15 @@ class Schoology:
         :return: List of Event objects.
         """
         if district_id:
-            return get_district_events(district_id)
+            return self.get_district_events(district_id)
         elif school_id:
-            return get_school_events(school_id)
+            return self.get_school_events(school_id)
         elif user_id:
-            return get_user_events(user_id)
+            return self.get_user_events(user_id)
         elif section_id:
-            return get_section_events(section_id)
+            return self.get_section_events(section_id)
         elif group_id:
-            return get_group_events(group_id)
+            return self.get_group_events(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -398,15 +398,15 @@ class Schoology:
         :return: List of Event objects.
         """
         if district_id:
-            return create_district_event(event, district_id)
+            return self.create_district_event(event, district_id)
         elif school_id:
-            return create_school_event(event, school_id)
+            return self.create_school_event(event, school_id)
         elif user_id:
-            return create_user_event(event, user_id)
+            return self.create_user_event(event, user_id)
         elif section_id:
-            return create_section_event(event, section_id)
+            return self.create_section_event(event, section_id)
         elif group_id:
-            return create_group_event(event, group_id)
+            return self.create_group_event(event, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -437,15 +437,15 @@ class Schoology:
         :return: Event object.
         """
         if district_id:
-            return get_district_event(event_id, district_id)
+            return self.get_district_event(event_id, district_id)
         elif school_id:
-            return get_school_event(event_id, school_id)
+            return self.get_school_event(event_id, school_id)
         elif user_id:
-            return get_user_event(event_id, user_id)
+            return self.get_user_event(event_id, user_id)
         elif section_id:
-            return get_section_event(event_id, section_id)
+            return self.get_section_event(event_id, section_id)
         elif group_id:
-            return get_group_event(event_id, group_id)
+            return self.get_group_event(event_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -474,15 +474,15 @@ class Schoology:
         :param *_id: ID of realm in which to create event.
         """
         if district_id:
-            get_district_event(event_id, district_id)
+            self.get_district_event(event_id, district_id)
         elif school_id:
-            get_school_event(event_id, school_id)
+            self.get_school_event(event_id, school_id)
         elif user_id:
-            get_user_event(event_id, user_id)
+            self.get_user_event(event_id, user_id)
         elif section_id:
-            get_section_event(event_id, section_id)
+            self.get_section_event(event_id, section_id)
         elif group_id:
-            get_group_event(event_id, group_id)
+            self.get_group_event(event_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -511,15 +511,15 @@ class Schoology:
         :param *_id: ID of realm in which to create event.
         """
         if district_id:
-            delete_district_event(event_id, district_id)
+            self.delete_district_event(event_id, district_id)
         elif school_id:
-            delete_school_event(event_id, school_id)
+            self.delete_school_event(event_id, school_id)
         elif user_id:
-            delete_user_event(event_id, user_id)
+            self.delete_user_event(event_id, user_id)
         elif section_id:
-            delete_section_event(event_id, section_id)
+            self.delete_section_event(event_id, section_id)
         elif group_id:
-            delete_group_event(event_id, group_id)
+            self.delete_group_event(event_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -550,15 +550,15 @@ class Schoology:
         :return: BlogPost object recieved from API.
         """
         if district_id:
-            return create_district_blog_post(post, district_id)
+            return self.create_district_blog_post(post, district_id)
         elif school_id:
-            return create_school_blog_post(post, school_id)
+            return self.create_school_blog_post(post, school_id)
         elif user_id:
-            return create_user_blog_post(post, user_id)
+            return self.create_user_blog_post(post, user_id)
         elif section_id:
-            return create_section_blog_post(post, section_id)
+            return self.create_section_blog_post(post, section_id)
         elif group_id:
-            return create_group_blog_post(post, group_id)
+            return self.create_group_blog_post(post, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -588,15 +588,15 @@ class Schoology:
         :return: List of BlogPost objects recieved from API.
         """
         if district_id:
-            return get_district_blog_posts(district_id)
+            return self.get_district_blog_posts(district_id)
         elif school_id:
-            return get_school_blog_posts(school_id)
+            return self.get_school_blog_posts(school_id)
         elif user_id:
-            return get_user_blog_posts(user_id)
+            return self.get_user_blog_posts(user_id)
         elif section_id:
-            return get_section_blog_posts(section_id)
+            return self.get_section_blog_posts(section_id)
         elif group_id:
-            return get_group_blog_posts(group_id)
+            return self.get_group_blog_posts(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -626,15 +626,15 @@ class Schoology:
         :return: List of BlogPost objects recieved from API.
         """
         if district_id:
-            return get_district_blog_posts(post_id, district_id)
+            return self.get_district_blog_posts(post_id, district_id)
         elif school_id:
-            return get_school_blog_posts(post_id, school_id)
+            return self.get_school_blog_posts(post_id, school_id)
         elif user_id:
-            return get_user_blog_posts(post_id, user_id)
+            return self.get_user_blog_posts(post_id, user_id)
         elif section_id:
-            return get_section_blog_posts(post_id, section_id)
+            return self.get_section_blog_posts(post_id, section_id)
         elif group_id:
-            return get_group_blog_posts(post_id, group_id)
+            return self.get_group_blog_posts(post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -664,15 +664,15 @@ class Schoology:
         :return: List of BlogPost objects recieved from API.
         """
         if district_id:
-            update_district_blog_post(post, district_id)
+            self.update_district_blog_post(post, district_id)
         elif school_id:
-            update_school_blog_post(post, school_id)
+            self.update_school_blog_post(post, school_id)
         elif user_id:
-            update_user_blog_post(post, user_id)
+            self.update_user_blog_post(post, user_id)
         elif section_id:
-            update_section_blog_post(post, section_id)
+            self.update_section_blog_post(post, section_id)
         elif group_id:
-            update_group_blog_post(post, group_id)
+            self.update_group_blog_post(post, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -702,15 +702,15 @@ class Schoology:
         :return: List of BlogPost objects recieved from API.
         """
         if district_id:
-            delete_district_blog_post(post_id, district_id)
+            self.delete_district_blog_post(post_id, district_id)
         elif school_id:
-            delete_school_blog_post(post_id, school_id)
+            self.delete_school_blog_post(post_id, school_id)
         elif user_id:
-            delete_user_blog_post(post_id, user_id)
+            self.delete_user_blog_post(post_id, user_id)
         elif section_id:
-            delete_section_blog_post(post_id, section_id)
+            self.delete_section_blog_post(post_id, section_id)
         elif group_id:
-            delete_group_blog_post(post_id, group_id)
+            self.delete_group_blog_post(post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -741,15 +741,15 @@ class Schoology:
         :return: BlogPost object recieved from API.
         """
         if district_id:
-            return create_district_blog_post(comment, post_id, district_id)
+            return self.create_district_blog_post(comment, post_id, district_id)
         elif school_id:
-            return create_school_blog_post(comment, post_id, school_id)
+            return self.create_school_blog_post(comment, post_id, school_id)
         elif user_id:
-            return create_user_blog_post(comment, post_id, user_id)
+            return self.create_user_blog_post(comment, post_id, user_id)
         elif section_id:
-            return create_section_blog_post(comment, post_id, section_id)
+            return self.create_section_blog_post(comment, post_id, section_id)
         elif group_id:
-            return create_group_blog_post(comment, post_id, group_id)
+            return self.create_group_blog_post(comment, post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -779,15 +779,15 @@ class Schoology:
         :return: List of BlogPostComment objects recieved from API.
         """
         if district_id:
-            return get_district_blog_post_comments(post_id, district_id)
+            return self.get_district_blog_post_comments(post_id, district_id)
         elif school_id:
-            return get_school_blog_post_comments(post_id, school_id)
+            return self.get_school_blog_post_comments(post_id, school_id)
         elif user_id:
-            return get_user_blog_post_comments(post_id, user_id)
+            return self.get_user_blog_post_comments(post_id, user_id)
         elif section_id:
-            return get_section_blog_post_comments(post_id, section_id)
+            return self.get_section_blog_post_comments(post_id, section_id)
         elif group_id:
-            return get_group_blog_post_comments(post_id, group_id)
+            return self.get_group_blog_post_comments(post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -819,15 +819,15 @@ class Schoology:
         :return: List of BlogPostComment objects recieved from API.
         """
         if district_id:
-            return get_district_blog_post_comment(comment_id, post_id, district_id)
+            return self.get_district_blog_post_comment(comment_id, post_id, district_id)
         elif school_id:
-            return get_school_blog_post_comment(comment_id, post_id, school_id)
+            return self.get_school_blog_post_comment(comment_id, post_id, school_id)
         elif user_id:
-            return get_user_blog_post_comment(comment_id, post_id, user_id)
+            return self.get_user_blog_post_comment(comment_id, post_id, user_id)
         elif section_id:
-            return get_section_blog_post_comment(comment_id, post_id, section_id)
+            return self.get_section_blog_post_comment(comment_id, post_id, section_id)
         elif group_id:
-            return get_group_blog_post_comment(comment_id, post_id, group_id)
+            return self.get_group_blog_post_comment(comment_id, post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -858,15 +858,15 @@ class Schoology:
         :param *_id: ID of realm in which to create event.
         """
         if district_id:
-            delete_district_blog_post_comment(comment_id, post_id, district_id)
+            self.delete_district_blog_post_comment(comment_id, post_id, district_id)
         elif school_id:
-            delete_school_blog_post_comment(comment_id, post_id, school_id)
+            self.delete_school_blog_post_comment(comment_id, post_id, school_id)
         elif user_id:
-            delete_user_blog_post_comment(comment_id, post_id, user_id)
+            self.delete_user_blog_post_comment(comment_id, post_id, user_id)
         elif section_id:
-            delete_section_blog_post_comment(comment_id, post_id, section_id)
+            self.delete_section_blog_post_comment(comment_id, post_id, section_id)
         elif group_id:
-            delete_group_blog_post_comment(comment_id, post_id, group_id)
+            self.delete_group_blog_post_comment(comment_id, post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -896,13 +896,13 @@ class Schoology:
         :return: List of BlogPostComment objects recieved from API.
         """
         if district_id:
-            return get_district_discussions(district_id)
+            return self.get_district_discussions(district_id)
         elif school_id:
-            return get_school_discussions(school_id)
+            return self.get_school_discussions(school_id)
         elif section_id:
-            return get_section_discussions(section_id)
+            return self.get_section_discussions(section_id)
         elif group_id:
-            return get_group_discussions(group_id)
+            return self.get_group_discussions(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -930,13 +930,13 @@ class Schoology:
         :return: List of BlogPostComment objects recieved from API.
         """
         if district_id:
-            return create_district_discussion(discussion, district_id)
+            return self.create_district_discussion(discussion, district_id)
         elif school_id:
-            return create_school_discussion(discussion, school_id)
+            return self.create_school_discussion(discussion, school_id)
         elif section_id:
-            return create_section_discussion(discussion, section_id)
+            return self.create_section_discussion(discussion, section_id)
         elif group_id:
-            return create_group_discussion(discussion, group_id)
+            return self.create_group_discussion(discussion, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -964,13 +964,13 @@ class Schoology:
         :return: Discussion object recieved from API.
         """
         if district_id:
-            return get_district_discussion(discussion_id, district_id)
+            return self.get_district_discussion(discussion_id, district_id)
         elif school_id:
-            return get_school_discussion(discussion_id, school_id)
+            return self.get_school_discussion(discussion_id, school_id)
         elif section_id:
-            return get_section_discussion(discussion_id, section_id)
+            return self.get_section_discussion(discussion_id, section_id)
         elif group_id:
-            return get_group_discussion(discussion_id, group_id)
+            return self.get_group_discussion(discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -998,13 +998,13 @@ class Schoology:
         :param *_id: ID of realm in which to create event.
         """
         if district_id:
-            delete_district_blog_post_comment(discussion_id, district_id)
+            self.delete_district_blog_post_comment(discussion_id, district_id)
         elif school_id:
-            delete_school_blog_post_comment(discussion_id, school_id)
+            self.delete_school_blog_post_comment(discussion_id, school_id)
         elif section_id:
-            delete_section_blog_post_comment(discussion_id, section_id)
+            self.delete_section_blog_post_comment(discussion_id, section_id)
         elif group_id:
-            delete_group_blog_post_comment(discussion_id, group_id)
+            self.delete_group_blog_post_comment(discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1033,13 +1033,13 @@ class Schoology:
         :return: BlogPost object recieved from API.
         """
         if district_id:
-            return create_district_discussion_reply(reply, discussion_id, district_id)
+            return self.create_district_discussion_reply(reply, discussion_id, district_id)
         elif school_id:
-            return create_school_discussion_reply(reply, discussion_id, school_id)
+            return self.create_school_discussion_reply(reply, discussion_id, school_id)
         elif section_id:
-            return create_section_discussion_reply(reply, discussion_id, section_id)
+            return self.create_section_discussion_reply(reply, discussion_id, section_id)
         elif group_id:
-            return create_group_discussion_reply(reply, discussion_id, group_id)
+            return self.create_group_discussion_reply(reply, discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1067,13 +1067,13 @@ class Schoology:
         :return: List of DiscussionReply objects recieved from API.
         """
         if district_id:
-            return get_district_discussion_replies(discussion_id, district_id)
+            return self.get_district_discussion_replies(discussion_id, district_id)
         elif school_id:
-            return get_school_discussion_replies(discussion_id, school_id)
+            return self.get_school_discussion_replies(discussion_id, school_id)
         elif section_id:
-            return get_section_discussion_replies(discussion_id, section_id)
+            return self.get_section_discussion_replies(discussion_id, section_id)
         elif group_id:
-            return get_group_discussion_replies(discussion_id, group_id)
+            return self.get_group_discussion_replies(discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1101,15 +1101,15 @@ class Schoology:
         :param *_id: ID of realm in which to create event.
         """
         if district_id:
-            return get_district_discussion_reply(reply_id, discussion_id, district_id)
+            return self.get_district_discussion_reply(reply_id, discussion_id, district_id)
         elif school_id:
-            return get_school_discussion_reply(reply_id, discussion_id, school_id)
+            return self.get_school_discussion_reply(reply_id, discussion_id, school_id)
         elif user_id:
-            return get_user_discussion_reply(reply_id, discussion_id, user_id)
+            return self.get_user_discussion_reply(reply_id, discussion_id, user_id)
         elif section_id:
-            return get_section_discussion_reply(reply_id, discussion_id, section_id)
+            return self.get_section_discussion_reply(reply_id, discussion_id, section_id)
         elif group_id:
-            return get_group_discussion_reply(reply_id, discussion_id, group_id)
+            return self.get_group_discussion_reply(reply_id, discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1137,13 +1137,13 @@ class Schoology:
         :param *_id: ID of realm in which to create event.
         """
         if district_id:
-            delete_district_discussion_reply(reply_id, discussion_id, district_id)
+            self.delete_district_discussion_reply(reply_id, discussion_id, district_id)
         elif school_id:
-            delete_school_discussion_reply(reply_id, discussion_id, school_id)
+            self.delete_school_discussion_reply(reply_id, discussion_id, school_id)
         elif section_id:
-            delete_section_discussion_reply(reply_id, discussion_id, section_id)
+            self.delete_section_discussion_reply(reply_id, discussion_id, section_id)
         elif group_id:
-            delete_group_discussion_reply(reply_id, discussion_id, group_id)
+            self.delete_group_discussion_reply(reply_id, discussion_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1170,11 +1170,11 @@ class Schoology:
         :param *_id: ID of realm in which to create update.
         """
         if user_id:
-            create_district_update(update, district_id)
+            self.create_district_update(update, district_id)
         elif section_id:
-            create_school_update(update, school_id)
+            self.create_school_update(update, school_id)
         elif group_id:
-            create_group_update(update, group_id)
+            self.create_group_update(update, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1197,11 +1197,11 @@ class Schoology:
         :param *_id: ID of realm in which updates are published.
         """
         if user_id:
-            get_user_updates(district_id)
+            self.get_user_updates(district_id)
         elif section_id:
-            get_user_updates(section_id)
+            self.get_user_updates(section_id)
         elif group_id:
-            get_user_updates(group_id)
+            self.get_user_updates(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1236,11 +1236,11 @@ class Schoology:
         :param *_id: ID of realm in which updates are published.
         """
         if user_id:
-            get_user_update(update_id, district_id)
+            self.get_user_update(update_id, district_id)
         elif section_id:
-            get_section_update(update_id, section_id)
+            self.get_section_update(update_id, section_id)
         elif group_id:
-            get_group_update(update_id, group_id)
+            self.get_group_update(update_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1264,11 +1264,11 @@ class Schoology:
         :param *_id: ID of realm in which updates are published.
         """
         if user_id:
-            delete_user_update(update_id, district_id)
+            self.delete_user_update(update_id, district_id)
         elif section_id:
-            delete_section_update(update_id, section_id)
+            self.delete_section_update(update_id, section_id)
         elif group_id:
-            delete_group_update(update_id, group_id)
+            self.delete_group_update(update_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1292,11 +1292,11 @@ class Schoology:
         :param *_id: ID of realm in which to create update.
         """
         if user_id:
-            return update_district_update(update, district_id)
+            return self.update_district_update(update, district_id)
         elif section_id:
-            return update_section_update(update, section_id)
+            return self.update_section_update(update, section_id)
         elif group_id:
-            return update_group_update(update, group_id)
+            return self.update_group_update(update, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1321,11 +1321,11 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if user_id:
-            return create_user_update_comment(comment, update_id, district_id)
+            return self.create_user_update_comment(comment, update_id, district_id)
         elif section_id:
-            return create_section_update_comment(comment, update_id, section_id)
+            return self.create_section_update_comment(comment, update_id, section_id)
         elif group_id:
-            return create_group_update_comment(comment, update_id, group_id)
+            return self.create_group_update_comment(comment, update_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1349,11 +1349,11 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if user_id:
-            return get_user_update_comments(update_id, district_id)
+            return self.get_user_update_comments(update_id, district_id)
         elif section_id:
-            return get_section_update_comments(update_id, section_id)
+            return self.get_section_update_comments(update_id, section_id)
         elif group_id:
-            return get_group_update_comments(update_id, group_id)
+            return self.get_group_update_comments(update_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1378,11 +1378,11 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if user_id:
-            return get_user_update_comment(comment_id, update_id, district_id)
+            return self.get_user_update_comment(comment_id, update_id, district_id)
         elif section_id:
-            return get_section_update_comment(comment_id, update_id, section_id)
+            return self.get_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
-            return get_group_update_comment(comment_id, update_id, group_id)
+            return self.get_group_update_comment(comment_id, update_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1407,11 +1407,11 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if user_id:
-            delete_user_update_comment(comment_id, update_id, district_id)
+            self.delete_user_update_comment(comment_id, update_id, district_id)
         elif section_id:
-            delete_section_update_comment(comment_id, update_id, section_id)
+            self.delete_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
-            delete_group_update_comment(comment_id, update_id, group_id)
+            self.delete_group_update_comment(comment_id, update_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1437,9 +1437,9 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if section_id:
-            return create_section_media_album(album, section)
+            return self.create_section_media_album(album, section)
         elif group_id:
-            return create_group_media_album(album, group_id)
+            return self.create_group_media_album(album, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1460,9 +1460,9 @@ class Schoology:
         :return: List of MediaAlbum objects.
         """
         if section_id:
-            return get_school_media_albums(section_id)
+            return self.get_school_media_albums(section_id)
         elif group_id:
-            return get_group_media_albums(group_id)
+            return self.get_group_media_albums(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1483,9 +1483,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            return get_section_media_album(album_id, section_id)
+            return self.get_section_media_album(album_id, section_id)
         elif group_id:
-            return get_group_media_album(album_id, group_id)
+            return self.get_group_media_album(album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1506,9 +1506,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            return update_section_media_album(album_id, section_id)
+            return self.update_section_media_album(album_id, section_id)
         elif group_id:
-            return update_group_media_album(album_id, group_id)
+            return self.update_group_media_album(album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1529,9 +1529,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            delete_section_media_album(album_id, section_id)
+            self.delete_section_media_album(album_id, section_id)
         elif group_id:
-            delete_group_media_album(album_id, group_id)
+            self.delete_group_media_album(album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1556,9 +1556,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            get_section_media_album_content(content_id, album_id, section_id)
+            self.get_section_media_album_content(content_id, album_id, section_id)
         elif group_id:
-            get_group_media_album_content(content_id, album_id, group_id)
+            self.get_group_media_album_content(content_id, album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1585,9 +1585,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            update_section_media_album_content(content, content_id, album_id, section_id)
+            self.update_section_media_album_content(content, content_id, album_id, section_id)
         elif group_id:
-            update_group_media_album_content(content, content_id, album_id, group_id)
+            self.update_group_media_album_content(content, content_id, album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1614,9 +1614,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            create_section_media_album_content(content, content_id, album_id, section_id)
+            self.create_section_media_album_content(content, content_id, album_id, section_id)
         elif group_id:
-            create_group_media_album_content(content, content_id, album_id, group_id)
+            self.create_group_media_album_content(content, content_id, album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1643,9 +1643,9 @@ class Schoology:
         :return: MediaAlbum object.
         """
         if section_id:
-            delete_section_media_album_content(content_id, album_id, section_id)
+            self.delete_section_media_album_content(content_id, album_id, section_id)
         elif group_id:
-            delete_group_media_album_content(content_id, album_id, group_id)
+            self.delete_group_media_album_content(content_id, album_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1666,9 +1666,9 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if school_id:
-            return create_section_media_album(document, school_id)
+            return self.create_section_media_album(document, school_id)
         if section_id:
-            return create_section_media_album(document, section_id)
+            return self.create_section_media_album(document, section_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1689,9 +1689,9 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if school_id:
-            return get_school_documents(school_id)
+            return self.get_school_documents(school_id)
         if section_id:
-            return get_section_documents(section_id)
+            return self.get_section_documents(section_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1712,9 +1712,9 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if school_id:
-            return get_school_document(document_id, school_id)
+            return self.get_school_document(document_id, school_id)
         if section_id:
-            return get_section_document(document_id, section_id)
+            return self.get_section_document(document_id, section_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1735,9 +1735,9 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if school_id:
-            update_school_document(document, document_id, school_id)
+            self.update_school_document(document, document_id, school_id)
         if section_id:
-            update_section_document(document, document_id, section_id)
+            self.update_section_document(document, document_id, section_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1758,9 +1758,9 @@ class Schoology:
         :param *_id: ID of realm in which to create update comment.
         """
         if school_id:
-            delete_school_document(document_id, school_id)
+            self.delete_school_document(document_id, school_id)
         if section_id:
-            delete_section_document(document_id, section_id)
+            self.delete_section_document(document_id, section_id)
         else:
             raise TypeError('Realm id property required.')
 
