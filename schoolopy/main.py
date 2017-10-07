@@ -1197,7 +1197,7 @@ class Schoology:
         :param *_id: ID of realm in which updates are published.
         """
         if user_id:
-            self.get_user_updates(district_id)
+            self.get_user_updates(user_id)
         elif section_id:
             self.get_user_updates(section_id)
         elif group_id:
@@ -1227,7 +1227,7 @@ class Schoology:
         return [Update(raw) for raw in self._get('recent')['update']]
 
 
-    def get_updates(self, user_id=None, section_id=None, group_id=None):
+    def get_update(self, update_id, user_id=None, section_id=None, group_id=None):
         """
         Helper function for getting updates in any realm.
 
@@ -1819,6 +1819,15 @@ class Schoology:
         """
         return [GradingCategory(raw) for raw in self._get('sections/%s/grading_categories' % section_id)['grading_category']]
 
+    def get_grading_category(self, category_id, section_id):
+        """
+        Get an individual grading category in a course section.
+
+        :param category_id: ID of category.
+        :param section_id: ID of category's section.
+        """
+        return GradingCategory(self._get('sections/%s/grading_categories/%s' % (section_id, category_id)))
+
     def update_grading_category(self, category, section_id):
         """
         Get data on an individual grading category in a course section.
@@ -1827,7 +1836,7 @@ class Schoology:
         :param section_id: ID of category's section.
         :return: GradingCategory object recieved from API.
         """
-        return self.create_grading_categories([category], section_id)
+        return self.create_grading_categories([category], section_id)[0]
 
     def create_grading_categories(self, categories, section_id):
         """
@@ -1838,8 +1847,70 @@ class Schoology:
         """
         return [GradingCategory(raw) for raw in self._post('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category.json for category in categories]}})['grading_category']]
 
+    def delete_grading_category(self, category_id, section_id):
+        """
+        Delete an individual grading category in a course section.
 
-    # TODO: Support Grading Groups
+        :param category_id: ID of category.
+        :param section_id: ID of category's section.
+        """
+        self._delete('sections/%s/grading_categories/%s' % (section_id, category_id))
+
+
+    def create_grading_groups(self, groups, section_id):
+        """
+        Create multiple grading groups.
+
+        :param groups: List of GradingGroup objects to create.
+        :param section_id: ID of section in which to create groups.
+        """
+        return [GradingGroup(raw) for raw in self._put('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group.json for group in groups]}})['grading_group']]
+
+    def get_grading_groups(self, section_id):
+        """
+        Get a list of grading groups in a course section.
+
+        :param section_id: ID of section whose groups to get.
+        """
+        return [GradingGroup(raw) for raw in self._get('sections/%s/grading_groups' % section_id)['grading_group']]
+
+    def get_grading_group(self, group_id, section_id):
+        """
+        Get an individual grading group in a course section.
+
+        :param group_id: ID of group.
+        :param section_id: ID of group's section.
+        """
+        return GradingGroup(self._get('sections/%s/grading_groups/%s' % (section_id, group_id)))
+
+    def update_grading_group(self, group, section_id):
+        """
+        Get data on an individual grading group in a course section.
+
+        :param group: Group object to update.
+        :param section_id: ID of group's section.
+        :return: GradingGroup object recieved from API.
+        """
+        return self.create_grading_groups([group], section_id)[0]
+
+    def create_grading_groups(self, groups, section_id):
+        """
+        Update multiple grading groups.
+
+        :param groups: List of GradingGroup objects to create.
+        :param section_id: ID of section in which to create groups.
+        """
+        return [GradingGroup(raw) for raw in self._post('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group.json for group in groups]}})['grading_group']]
+
+    def delete_grading_group(self, group_id, section_id):
+        """
+        Delete an individual grading group in a course section.
+
+        :param group_id: ID of group.
+        :param section_id: ID of group's section.
+        """
+        self._delete('sections/%s/grading_groups/%s' % (section_id, group_id))
+
 
     def get_assignments(self, section_id):
         return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id)['assignment']]
