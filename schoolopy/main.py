@@ -1801,21 +1801,58 @@ class Schoology:
         """
         return Rubric(self._get('sections/%s/grading_rubrics/%s' % (section_id, rubric_id)))
 
-    # TODO: Support Categories, and Groups
 
+    def create_grading_categories(self, categories, section_id):
+        """
+        Create multiple grading categories.
+
+        :param categories: List of GradingCategory objects to create.
+        :param section_id: ID of section in which to create categories.
+        """
+        return [GradingCategory(raw) for raw in self._put('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category.json for category in categories]}})['grading_category']]
+
+    def get_grading_categories(self, section_id):
+        """
+        Get a list of grading categories in a course section.
+
+        :param section_id: ID of section whose categories to get.
+        """
+        return [GradingCategory(raw) for raw in self._get('sections/%s/grading_categories' % section_id)['grading_category']]
+
+    def update_grading_category(self, category, section_id):
+        """
+        Get data on an individual grading category in a course section.
+
+        :param category: Category object to update.
+        :param section_id: ID of category's section.
+        :return: GradingCategory object recieved from API.
+        """
+        return self.create_grading_categories([category], section_id)
+
+    def create_grading_categories(self, categories, section_id):
+        """
+        Update multiple grading categories.
+
+        :param categories: List of GradingCategory objects to create.
+        :param section_id: ID of section in which to create categories.
+        """
+        return [GradingCategory(raw) for raw in self._post('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category.json for category in categories]}})['grading_category']]
+
+
+    # TODO: Support Grading Groups
 
     def get_assignments(self, section_id):
-        return [Assignment(raw) for raw in self._get('section/%s/assignments' % section_id)['assignment']]
+        return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id)['assignment']]
 
     def get_assignment(self, section_id, assignment_id):
-        return Assignment(self._get('section/%s/assignments/%s' % (section_id, assignment_id)))
+        return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id)))
 
 
     def get_assignment_comments(self, section_id, assignment_id):
-        return [Assignment(raw) for raw in self._get('section/%s/assignments/%s/comments' % (section_id, assignment_id))['comment']]
+        return [Assignment(raw) for raw in self._get('sections/%s/assignments/%s/comments' % (section_id, assignment_id))['comment']]
 
     def get_assignment_comment(self, section_id, assignment_id, comment_id):
-        return Assignment(self._get('section/%s/assignments/%s' % (section_id, assignment_id)))
+        return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id)))
 
 
     # TODO: Support Grades
