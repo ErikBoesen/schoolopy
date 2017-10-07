@@ -1655,8 +1655,121 @@ class Schoology:
     def delete_group_media_album_content(self, content_id, album_id, group_id):
         self._delete('groups/%s/albums/%s/content/%s' % (group_id, album_id, content_id))
 
-        
-    # TODO: Support Documents
+
+    def create_document(self, document, section_id=None, group_id=None):
+        """
+        Helper function for creating a document in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param document: Document object to post to API.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if school_id:
+            return create_section_media_album(document, school_id)
+        if section_id:
+            return create_section_media_album(document, section_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_school_media_album(self, document, school_id):
+        return Document(self._post('schools/%s/documents' % school_id, document.json))
+
+    def create_section_media_album(self, document, section_id):
+        return Document(self._post('sections/%s/documents' % section_id, document.json))
+
+
+    def get_documents(self, section_id=None, group_id=None):
+        """
+        Helper function for creating a document in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param document: Document object to post to API.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if school_id:
+            return get_school_documents(school_id)
+        if section_id:
+            return get_section_documents(section_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_school_documents(self, school_id):
+        return [Document(raw) for raw in self._post('schools/%s/documents' % school_id)['document']]
+
+    def get_section_documents(self, section_id):
+        return [Document(raw) for raw in self._post('sections/%s/documents' % section_id)['document']]
+
+
+    def get_document(self, document_id, section_id=None, group_id=None):
+        """
+        Helper function for getting data on an individual document in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param document: Document object to post to API.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if school_id:
+            return get_school_document(document_id, school_id)
+        if section_id:
+            return get_section_document(document_id, section_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_school_document(self, document_id, school_id):
+        return Document(self._post('schools/%s/documents/%s' % (school_id, document_id)))
+
+    def get_section_document(self, document_id, section_id):
+        return Document(self._post('sections/%s/documents/%s' % (section_id, document_id)))
+
+
+    def update_document(self, document, document_id, section_id=None, group_id=None):
+        """
+        Helper function for updating an individual document in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param document: Document object to post to API.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if school_id:
+            update_school_document(document, document_id, school_id)
+        if section_id:
+            update_section_document(document, document_id, section_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def update_school_document(self, document, document_id, school_id):
+        self._put('schools/%s/documents/%s' % (school_id, document_id), document.json)
+
+    def update_section_document(self, document, document_id, section_id):
+        self._put('sections/%s/documents/%s' % (section_id, document_id), document.json)
+
+
+    def delete_document(self, document_id, section_id=None, group_id=None):
+        """
+        Helper function for deleting an individual document in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        :param document_id: ID of document to delete.
+        :param *_id: ID of realm in which to create update comment.
+        """
+        if school_id:
+            delete_school_document(document_id, school_id)
+        if section_id:
+            delete_section_document(document_id, section_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_school_document(self, document_id, school_id):
+        self._put('schools/%s/documents/%s' % (school_id, document_id))
+
+    def delete_section_document(self, document_id, section_id):
+        self._put('sections/%s/documents/%s' % (section_id, document_id))
+
     # TODO: Support Grading Scales, Rubrics, Categories, and Groups
 
 
