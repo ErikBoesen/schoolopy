@@ -1536,12 +1536,126 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def delete_section_media_album(self, album_id, section_id):
-        self._delete('sections/%s/albums/%s' % (section_id, album_id)))
+        self._delete('sections/%s/albums/%s' % (section_id, album_id))
 
     def delete_group_media_album(self, album_id, group_id):
-        self._delete('groups/%s/albums/%s' % (group_id, album_id)))
+        self._delete('groups/%s/albums/%s' % (group_id, album_id))
 
 
+    def get_media_album_content(self, content_id, album_id, section_id=None, group_id=None):
+        """
+        Helper function for getting data on a media item from an album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
+        that endpoint is no longer maintained. For forward-compatibility, it's better to deal
+        with this request as we do others.
+
+        :param *_id: ID of realm in which album is located.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            get_section_media_album_content(content_id, album_id, section_id)
+        elif group_id:
+            get_group_media_album_content(content_id, album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def get_section_media_album_content(self, content_id, album_id, section_id):
+        return Media(self._get('sections/%s/albums/%s/content/%s' % (section_id, album_id, content_id)))
+
+    def get_group_media_album_content(self, content_id, album_id, group_id):
+        return Media(self._get('groups/%s/albums/%s/content/%s' % (group_id, album_id, content_id)))
+
+
+    def update_media_album_content(self, content, content_id, album_id, section_id=None, group_id=None):
+        """
+        Helper function for updating a media item from an album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
+        that endpoint is no longer maintained. For forward-compatibility, it's better to deal
+        with this request as we do others.
+
+        :param content: Content object containing data to update.
+        :param content_id: ID of content to update.
+        :param *_id: ID of realm from which to delete album.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            update_section_media_album_content(content, content_id, album_id, section_id)
+        elif group_id:
+            update_group_media_album_content(content, content_id, album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def update_section_media_album_content(self, content, content_id, album_id, section_id):
+        self._put('sections/%s/albums/%s/content/%s' % (section_id, album_id, content_id), content.json)
+
+    def update_group_media_album_content(self, content, content_id, album_id, group_id):
+        self._put('groups/%s/albums/%s/content/%s' % (group_id, album_id, content_id), content.json)
+
+
+    def create_media_album_content(self, content, content_id, album_id, section_id=None, group_id=None):
+        """
+        Helper function for creating a media item in an album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
+        that endpoint is no longer maintained. For forward-compatibility, it's better to deal
+        with this request as we do others.
+
+        :param content: Content object containing data to update.
+        :param content_id: ID of content to update.
+        :param *_id: ID of realm from which to delete album.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            create_section_media_album_content(content, content_id, album_id, section_id)
+        elif group_id:
+            create_group_media_album_content(content, content_id, album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def create_section_media_album_content(self, content, content_id, album_id, section_id):
+        return Media(self._post('sections/%s/albums/%s/content' % (section_id, album_id), content.json))
+
+    def create_group_media_album_content(self, content, content_id, album_id, group_id):
+        return Media(self._post('groups/%s/albums/%s/content' % (group_id, album_id), content.json))
+
+
+    def delete_media_album_content(self, content_id, album_id, section_id=None, group_id=None):
+        """
+        Helper function for updating a media item from an album in any realm.
+
+        Exactly one realm id property must be specified by name in calls to this method.
+
+        Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
+        that endpoint is no longer maintained. For forward-compatibility, it's better to deal
+        with this request as we do others.
+
+        :param content: Content object containing data to update.
+        :param content_id: ID of content to update.
+        :param *_id: ID of realm from which to delete album.
+        :return: MediaAlbum object.
+        """
+        if section_id:
+            delete_section_media_album_content(content_id, album_id, section_id)
+        elif group_id:
+            delete_group_media_album_content(content_id, album_id, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
+    def delete_section_media_album_content(self, content_id, album_id, section_id):
+        self._delete('sections/%s/albums/%s/content/%s' % (section_id, album_id, content_id))
+
+    def delete_group_media_album_content(self, content_id, album_id, group_id):
+        self._delete('groups/%s/albums/%s/content/%s' % (group_id, album_id, content_id))
+
+        
     # TODO: Support Documents
     # TODO: Support Grading Scales, Rubrics, Categories, and Groups
 
