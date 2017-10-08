@@ -129,13 +129,25 @@ class Schoology:
         """
         return Building(self._post('schools/%s/buildings' % school_id, building.json))
 
-    def get_users(self):
+    def get_me(self):
+        """
+        Get data of the client using this method (Yourself)
+
+        :return: User object obtained from API. (Of yourself)
+        """
+        return User(self._get('users/me'))
+
+    def get_users(self, inactive=False):
         """
         Get data on all users.
 
+        :param inactive: Gets inactive users instead of normal ones.
         :return: List of User objects.
         """
-        return [User(raw) for raw in self._get('users')['user']]
+        path = 'users' + ('/inactive' if inactive else '')
+        if 'total' not in self._get(path):
+            return []
+        return [User(raw) for raw in self._get(path)['user']]
 
     def get_user(self, user_id):
         """
@@ -154,7 +166,17 @@ class Schoology:
         :param user: User object containing necessary fields.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s' % user_id, user.json))
+        return User(self._post('users/%s' % user_id, user.json())
+
+    def create_users(self, users):
+        """
+        Bulk create users.
+
+        :param users: A list of users
+        :return: User objects obtained from API.
+        """
+        userDictionary = {'users' : [user.json() for user in users]}
+        return [User(raw) for raw in self._post('users', userDictionary['users'])]
 
     def update_user(self, user_id, user):
         """
@@ -164,7 +186,15 @@ class Schoology:
         :param user: User object containing necessary fields.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s?update_existing=1' % user_id, user.json))
+        return User(self._post('users/%s?update_existing=1' % user_id, user.json()))
+
+    def get_languages(self):
+        """
+        Get data on all languages a user can have.
+
+        :return: A list of Language objects.
+        """
+        return [Language(raw) for raw in self._get('users/languages')['language']]
 
     def get_groups(self):
         """
