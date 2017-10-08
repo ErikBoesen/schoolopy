@@ -146,6 +146,26 @@ class Schoology:
         """
         return User(self._get('users/%s' % user_id))
 
+    def create_user(self, user_id, user):
+        """
+        Create a new user.
+
+        :param user_id: ID of user you wish to create.
+        :param user: User object containing necessary fields.
+        :return: User object obtained from API.
+        """
+        return User(self._post('users/%s' % user_id), user.json)
+
+    def update_user(self, user_id, user):
+        """
+        Update an existing user.
+
+        :param user_id: ID of user you wish to update.
+        :param user: User object containing necessary fields.
+        :return: User object obtained from API.
+        """
+        return User(self._post('users/%s?update_existing=1' % user_id), user.json)
+
     def get_groups(self):
         """
         Get data on all groups.
