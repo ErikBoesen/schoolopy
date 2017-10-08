@@ -1,13 +1,14 @@
 class _base_model(dict):
-    def __init__(self, json):
-        self.json = json
+    def __init__(self, json={}):
         self.update(json)
         self.update(self.__dict__)
         self.__dict__ = self
 
     def __repr__(self):
-        contents = {k: self[k] for k in self if k != 'json'}  # Exclude :json: from the string
-        return '%s(%s)' % (self.__class__.__name__, dict.__repr__(contents))
+        return '%s(%s)' % (self.__class__.__name__, dict.__repr__(self.json()))
+
+    def json(self):
+        return {k: self[k] for k in self}
 
 
 def _model(class_name):
