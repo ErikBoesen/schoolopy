@@ -154,7 +154,7 @@ class Schoology:
         :param user: User object containing necessary fields.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s' % user_id), user.json)
+        return User(self._post('users/%s' % user_id, user.json))
 
     def update_user(self, user_id, user):
         """
@@ -164,7 +164,7 @@ class Schoology:
         :param user: User object containing necessary fields.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s?update_existing=1' % user_id), user.json)
+        return User(self._post('users/%s?update_existing=1' % user_id, user.json))
 
     def get_groups(self):
         """
