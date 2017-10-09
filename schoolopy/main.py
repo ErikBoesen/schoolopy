@@ -25,6 +25,15 @@ class Schoology:
         auth += 'oauth_signature="%s%%26"' % self.secret
         return auth
 
+    def _request_header(self):
+        header = {
+            'Authorization': self._oauth_header(),
+            'Accept': 'application/json',
+            'Host': 'api.schoology.com',
+            'Content-Type': 'application/json'
+        }
+        return header
+
     def _get(self, path):
         """
         GET data from a given endpoint.
@@ -33,7 +42,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.get(self._ROOT + path, headers={'Authorization': self._oauth_header()}).json()
+            return requests.get(self._ROOT + path, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -46,7 +55,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.post(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+            return requests.post(self._ROOT + path, json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -59,7 +68,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.put(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+            return requests.put(self._ROOT + path, json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -69,8 +78,7 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        requests.delete(self._ROOT + path, headers={'Authorization': self._oauth_header()})
-
+        requests.delete(self._ROOT + path, headers=self._request_header())
 
     def get_schools(self):
         """
@@ -95,7 +103,7 @@ class Schoology:
         :param school: School object containing necessary fields.
         :return: School object obtained from API.
         """
-        return School(self._post('schools', school.json()))
+        return School(self._post('schools', school))
 
     def edit_school(self, school_id, school):
         """
@@ -106,7 +114,7 @@ class Schoology:
         :return: School object obtained from API.
         """
         # TODO: Does this endpoint return anything?
-        self._put('schools/%s' % school_id, school.json())
+        self._put('schools/%s' % school_id, school)
 
     def get_buildings(self, school_id):
         """
@@ -127,7 +135,15 @@ class Schoology:
         :param building: Building object containing necessary fields.
         :return: Building object obtained from API.
         """
-        return Building(self._post('schools/%s/buildings' % school_id, building.json()))
+        return Building(self._post('schools/%s/buildings' % school_id, building))
+
+    def get_self_user_info(self):
+        """
+        Gets user info for yourself, if you have a current Schoology sessions
+
+        :return: WebsiteClient object obtained from API.
+        """
+        return WebsiteClient(self._get('app-user-info'))
 
     def get_me(self):
         """
@@ -135,7 +151,7 @@ class Schoology:
 
         :return: User object obtained from API. (Of yourself)
         """
-        return User(self._get('users/me'))
+        return User(self.get_user(self.get_self_user_info()['api_uid']))
 
     def get_users(self, inactive=False):
         """
@@ -144,29 +160,26 @@ class Schoology:
         :param inactive: Gets inactive users instead of normal ones.
         :return: List of User objects.
         """
-        path = 'users' + ('/inactive' if inactive else '')
-        if 'total' not in self._get(path):
-            return []
-        return [User(raw) for raw in self._get(path)['user']]
+        return [User(raw) for raw in self._get('users' + ('/inactive' if inactive else ''))['user']]
 
-    def get_user(self, user_id):
+    def get_user(self, user_id, inactive=False):
         """
         Get data on an individual user.
 
         :param user_id: ID of user on whom to get data.
         :return: User object.
         """
-        return User(self._get('users/%s' % user_id))
+        return User(self._get(('users/' + ('inactive/' if inactive else '') + '%s') % user_id))
 
-    def create_user(self, user_id, user):
+    def create_user(self, user, user_id):
         """
         Create a new user.
 
-        :param user_id: ID of user you wish to create.
         :param user: User object containing necessary fields.
+        :param user_id: ID of user you wish to create.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s' % user_id, user.json())
+        return User(self._post('users/%s' % user_id, user))
 
     def create_users(self, users):
         """
@@ -175,18 +188,38 @@ class Schoology:
         :param users: A list of users
         :return: User objects obtained from API.
         """
-        userDictionary = {'users' : [user.json() for user in users]}
-        return [User(raw) for raw in self._post('users', userDictionary['users'])]
+        if len(users) > 50:
+            raise AttributeError("Your list of users must hold no more than 50 people.")
+        return [User(raw) for raw in self._post('users', {'users': {'user': [user.json() for user in users]}})]
 
-    def update_user(self, user_id, user):
+    def update_user(self, user, user_id):
         """
         Update an existing user.
 
-        :param user_id: ID of user you wish to update.
         :param user: User object containing necessary fields.
+        :param user_id: ID of user you wish to update.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s?update_existing=1' % user_id, user.json()))
+        self._put('users/%s' % user_id, user)
+
+    def update_users(self, users):
+        """
+        Bulk update users.
+
+        :param users: A list of users
+        :return: User objects obtained from API.
+        """
+        if len(users) > 50:
+            raise AttributeError("Your list of users must hold no more than 50 people.")
+        return [User(raw) for raw in self._put('users', {'users': {'user': [user.json() for user in users]}})]
+
+    def delete_user(self, user_id):
+        """
+        Delete a user.
+
+        :param user_id: ID of user you wish to delete.
+        """
+        self._delete('users/%s' % user_id)
 
     def get_languages(self):
         """
@@ -266,10 +299,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_section_enrollment(self, enrollment, section_id):
-        return Enrollment(self._post('sections/%s/enrollments' % section_id, enrollment.json()))
+        return Enrollment(self._post('sections/%s/enrollments' % section_id, enrollment))
 
     def create_group_enrollment(self, enrollment, group_id):
-        return Enrollment(self._post('groups/%s/enrollments' % group_id, enrollment.json()))
+        return Enrollment(self._post('groups/%s/enrollments' % group_id, enrollment))
 
     def get_enrollments(self, section_id=None, group_id=None):
         """
@@ -461,19 +494,19 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_event(self, event, district_id):
-        return Event(self._post('districts/%s/events' % district_id, event.json()))
+        return Event(self._post('districts/%s/events' % district_id, event))
 
     def create_school_event(self, event, school_id):
-        return Event(self._post('schools/%s/events' % school_id, event.json()))
+        return Event(self._post('schools/%s/events' % school_id, event))
 
     def create_user_event(self, event, user_id):
-        return Event(self._post('users/%s/events' % user_id, event.json()))
+        return Event(self._post('users/%s/events' % user_id, event))
 
     def create_section_event(self, event, section_id):
-        return Event(self._post('sections/%s/events' % section_id, event.json()))
+        return Event(self._post('sections/%s/events' % section_id, event))
 
     def create_group_event(self, event, group_id):
-        return Event(self._post('groups/%s/events' % group_id, event.json()))
+        return Event(self._post('groups/%s/events' % group_id, event))
 
 
     def get_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
@@ -537,19 +570,19 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def update_district_event(self, event, district_id):
-        self._put('districts/%s/events/%s' % (district_id, event.id), event.json())
+        self._put('districts/%s/events/%s' % (district_id, event.id), event)
 
     def update_school_event(self, event, school_id):
-        self._put('schools/%s/events/%s' % (school_id, event.id), event.json())
+        self._put('schools/%s/events/%s' % (school_id, event.id), event)
 
     def update_user_event(self, event, user_id):
-        self._put('users/%s/events/%s' % (user_id, event.id), event.json())
+        self._put('users/%s/events/%s' % (user_id, event.id), event)
 
     def update_section_event(self, event, section_id):
-        self._put('sections/%s/events/%s' % (section_id, event.id), event.json())
+        self._put('sections/%s/events/%s' % (section_id, event.id), event)
 
     def update_group_event(self, event, group_id):
-        self._put('groups/%s/events/%s' % (group_id, event.id), event.json())
+        self._put('groups/%s/events/%s' % (group_id, event.id), event)
 
     def delete_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
@@ -574,19 +607,19 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def delete_district_event(self, event_id, district_id):
-        self._delete('districts/%s/events/%s' % (district_id, event_id), event.json())
+        self._delete('districts/%s/events/%s' % (district_id, event_id), event)
 
     def delete_school_event(self, event_id, school_id):
-        self._delete('schools/%s/events/%s' % (school_id, event_id), event.json())
+        self._delete('schools/%s/events/%s' % (school_id, event_id), event)
 
     def delete_user_event(self, event_id, user_id):
-        self._delete('users/%s/events/%s' % (user_id, event_id), event.json())
+        self._delete('users/%s/events/%s' % (user_id, event_id), event)
 
     def delete_section_event(self, event_id, section_id):
-        self._delete('sections/%s/events/%s' % (section_id, event_id), event.json())
+        self._delete('sections/%s/events/%s' % (section_id, event_id), event)
 
     def delete_group_event(self, event_id, group_id):
-        self._delete('groups/%s/events/%s' % (group_id, event_id), event.json())
+        self._delete('groups/%s/events/%s' % (group_id, event_id), event)
 
 
     def create_blog_post(self, post, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
@@ -613,19 +646,19 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_blog_post(self, post, district_id):
-        return BlogPost(self._post('districts/%s/posts' % district_id, post.json()))
+        return BlogPost(self._post('districts/%s/posts' % district_id, post))
 
     def create_school_blog_post(self, post, school_id):
-        return BlogPost(self._post('schools/%s/posts' % school_id, post.json()))
+        return BlogPost(self._post('schools/%s/posts' % school_id, post))
 
     def create_user_blog_post(self, post, user_id):
-        return BlogPost(self._post('users/%s/posts' % user_id, post.json()))
+        return BlogPost(self._post('users/%s/posts' % user_id, post))
 
     def create_section_blog_post(self, post, section_id):
-        return BlogPost(self._post('sections/%s/posts' % section_id, post.json()))
+        return BlogPost(self._post('sections/%s/posts' % section_id, post))
 
     def create_group_blog_post(self, post, group_id):
-        return BlogPost(self._post('groups/%s/posts' % group_id, post.json()))
+        return BlogPost(self._post('groups/%s/posts' % group_id, post))
 
 
     def get_blog_posts(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
@@ -727,19 +760,19 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def update_district_blog_post(self, post, district_id):
-        self._put('districts/%s/posts/%s' % (district_id, post.id), post.json())
+        self._put('districts/%s/posts/%s' % (district_id, post.id), post)
 
     def update_school_blog_post(self, post, school_id):
-        self._put('schools/%s/posts/%s' % (school_id, post.id), post.json())
+        self._put('schools/%s/posts/%s' % (school_id, post.id), post)
 
     def update_user_blog_post(self, post, user_id):
-        self._put('users/%s/posts/%s' % (user_id, post.id), post.json())
+        self._put('users/%s/posts/%s' % (user_id, post.id), post)
 
     def update_section_blog_post(self, post, section_id):
-        self._put('sections/%s/posts/%s' % (section_id, post.id), post.json())
+        self._put('sections/%s/posts/%s' % (section_id, post.id), post)
 
     def update_group_blog_post(self, post, group_id):
-        self._put('groups/%s/posts/%s' % (group_id, post.id), post.json())
+        self._put('groups/%s/posts/%s' % (group_id, post.id), post)
 
 
     def delete_blog_post(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
@@ -804,19 +837,19 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_blog_post_comment(self, comment, post_id, district_id):
-        return BlogPostComment(self._post('districts/%s/posts/%s/comments' % (district_id, post_id), comment.json()))
+        return BlogPostComment(self._post('districts/%s/posts/%s/comments' % (district_id, post_id), comment))
 
     def create_school_blog_post_comment(self, comment, post_id, school_id):
-        return BlogPostComment(self._post('schools/%s/posts/%s/comments' % (school_id, post_id), comment.json()))
+        return BlogPostComment(self._post('schools/%s/posts/%s/comments' % (school_id, post_id), comment))
 
     def create_user_blog_post_comment(self, comment, post_id, user_id):
-        return BlogPostComment(self._post('users/%s/posts/%s/comments' % (user_id, post_id), comment.json()))
+        return BlogPostComment(self._post('users/%s/posts/%s/comments' % (user_id, post_id), comment))
 
     def create_section_blog_post_comment(self, comment, post_id, section_id):
-        return BlogPostComment(self._post('sections/%s/posts/%s/comments' % (section_id, post_id), comment.json()))
+        return BlogPostComment(self._post('sections/%s/posts/%s/comments' % (section_id, post_id), comment))
 
     def create_group_blog_post_comment(self, comment, post_id, group_id):
-        return BlogPostComment(self._post('groups/%s/posts/%s/comments' % (group_id, post_id), comment.json()))
+        return BlogPostComment(self._post('groups/%s/posts/%s/comments' % (group_id, post_id), comment))
 
 
     def get_blog_post_comments(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
@@ -991,16 +1024,16 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_discussion(self, discussion, district_id):
-        return Discussion(self._post('districts/%s/discussions/%s' % (district_id, discussion_id), discussion.json()))
+        return Discussion(self._post('districts/%s/discussions/%s' % (district_id, discussion_id), discussion))
 
     def create_school_discussion(self, discussion, school_id):
-        return Discussion(self._post('schools/%s/discussions/%s' % (school_id, discussion_id), discussion.json()))
+        return Discussion(self._post('schools/%s/discussions/%s' % (school_id, discussion_id), discussion))
 
     def create_section_discussion(self, discussion, section_id):
-        return Discussion(self._post('sections/%s/discussions/%s' % (section_id, discussion_id), discussion.json()))
+        return Discussion(self._post('sections/%s/discussions/%s' % (section_id, discussion_id), discussion))
 
     def create_group_discussion(self, discussion, group_id):
-        return Discussion(self._post('groups/%s/discussions/%s' % (group_id, discussion_id), discussion.json()))
+        return Discussion(self._post('groups/%s/discussions/%s' % (group_id, discussion_id), discussion))
 
 
     def get_discussion(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
@@ -1094,16 +1127,16 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_discussion_reply(self, reply, discussion_id, district_id):
-        return DiscussionReply(self._post('districts/%s/discussions/%s/comments' % (district_id, discussion_id), reply.json()))
+        return DiscussionReply(self._post('districts/%s/discussions/%s/comments' % (district_id, discussion_id), reply))
 
     def create_school_discussion_reply(self, reply, discussion_id, school_id):
-        return DiscussionReply(self._post('schools/%s/discussions/%s/comments' % (school_id, discussion_id), reply.json()))
+        return DiscussionReply(self._post('schools/%s/discussions/%s/comments' % (school_id, discussion_id), reply))
 
     def create_section_discussion_reply(self, reply, discussion_id, section_id):
-        return DiscussionReply(self._post('sections/%s/discussions/%s/comments' % (section_id, discussion_id), reply.json()))
+        return DiscussionReply(self._post('sections/%s/discussions/%s/comments' % (section_id, discussion_id), reply))
 
     def create_group_discussion_reply(self, reply, discussion_id, group_id):
-        return DiscussionReply(self._post('groups/%s/discussions/%s/comments' % (group_id, discussion_id), reply.json()))
+        return DiscussionReply(self._post('groups/%s/discussions/%s/comments' % (group_id, discussion_id), reply))
 
 
     def get_discussion_replies(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
@@ -1229,13 +1262,13 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_update(update, district_id):
-        return Update(self._post('districts/%s/updates', update.json()))
+        return Update(self._post('districts/%s/updates', update))
 
     def create_section_update(update, section_id):
-        return Update(self._post('sections/%s/updates', update.json()))
+        return Update(self._post('sections/%s/updates', update))
 
     def create_group_update(update, group_id):
-        return Update(self._post('groups/%s/updates', update.json()))
+        return Update(self._post('groups/%s/updates', update))
 
 
     def get_updates(self, user_id=None, section_id=None, group_id=None):
@@ -1351,13 +1384,13 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def update_district_update(update, district_id):
-        return Update(self._put('districts/%s/updates', update.json()))
+        return Update(self._put('districts/%s/updates', update))
 
     def update_section_update(update, section_id):
-        return Update(self._put('sections/%s/updates', update.json()))
+        return Update(self._put('sections/%s/updates', update))
 
     def update_group_update(update, group_id):
-        return Update(self._put('groups/%s/updates', update.json()))
+        return Update(self._put('groups/%s/updates', update))
 
 
     def create_update_comment(self, comment, update_id, user_id=None, section_id=None, group_id=None):
@@ -1380,13 +1413,13 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_update(update, district_id):
-        return Update(self._post('districts/%s/updates', comment.json()))
+        return Update(self._post('districts/%s/updates', comment))
 
     def create_section_update(update, section_id):
-        return Update(self._post('sections/%s/updates', comment.json()))
+        return Update(self._post('sections/%s/updates', comment))
 
     def create_group_update(update, group_id):
-        return Update(self._post('groups/%s/updates', comment.json()))
+        return Update(self._post('groups/%s/updates', comment))
 
 
     def get_update_comments(self, comment, update_id, user_id=None, section_id=None, group_id=None):
@@ -1494,10 +1527,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_section_media_album(self, album, section_id):
-        return MediaAlbum(self._post('sections/%s/albums' % section_id, album.json()))
+        return MediaAlbum(self._post('sections/%s/albums' % section_id, album))
 
     def create_group_media_album(self, album, group_id):
-        return MediaAlbum(self._post('groups/%s/albums' % group_id, album.json()))
+        return MediaAlbum(self._post('groups/%s/albums' % group_id, album))
 
 
     def get_media_albums(self, section_id=None, group_id=None):
@@ -1642,10 +1675,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def update_section_media_album_content(self, content, content_id, album_id, section_id):
-        self._put('sections/%s/albums/%s/content/%s' % (section_id, album_id, content_id), content.json())
+        self._put('sections/%s/albums/%s/content/%s' % (section_id, album_id, content_id), content)
 
     def update_group_media_album_content(self, content, content_id, album_id, group_id):
-        self._put('groups/%s/albums/%s/content/%s' % (group_id, album_id, content_id), content.json())
+        self._put('groups/%s/albums/%s/content/%s' % (group_id, album_id, content_id), content)
 
 
     def create_media_album_content(self, content, content_id, album_id, section_id=None, group_id=None):
@@ -1671,10 +1704,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_section_media_album_content(self, content, content_id, album_id, section_id):
-        return Media(self._post('sections/%s/albums/%s/content' % (section_id, album_id), content.json()))
+        return Media(self._post('sections/%s/albums/%s/content' % (section_id, album_id), content))
 
     def create_group_media_album_content(self, content, content_id, album_id, group_id):
-        return Media(self._post('groups/%s/albums/%s/content' % (group_id, album_id), content.json()))
+        return Media(self._post('groups/%s/albums/%s/content' % (group_id, album_id), content))
 
 
     def delete_media_album_content(self, content_id, album_id, section_id=None, group_id=None):
@@ -1723,10 +1756,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_school_media_album(self, document, school_id):
-        return Document(self._post('schools/%s/documents' % school_id, document.json()))
+        return Document(self._post('schools/%s/documents' % school_id, document))
 
     def create_section_media_album(self, document, section_id):
-        return Document(self._post('sections/%s/documents' % section_id, document.json()))
+        return Document(self._post('sections/%s/documents' % section_id, document))
 
 
     def get_documents(self, section_id=None, group_id=None):
@@ -1792,10 +1825,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def update_school_document(self, document, document_id, school_id):
-        self._put('schools/%s/documents/%s' % (school_id, document_id), document.json())
+        self._put('schools/%s/documents/%s' % (school_id, document_id), document)
 
     def update_section_document(self, document, document_id, section_id):
-        self._put('sections/%s/documents/%s' % (section_id, document_id), document.json())
+        self._put('sections/%s/documents/%s' % (section_id, document_id), document)
 
 
     def delete_document(self, document_id, section_id=None, group_id=None):
@@ -2051,7 +2084,42 @@ class Schoology:
         """
         return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
+    def send_message(self, subject, message, user_ids):
+        """
+        Send a message to a user or users.
+
+        :param subject: A string holding the subject of a message.
+        :param message: A string holding the body of a message.
+        :param user_ids: A list of user ids to send the message to.
+        """
+        users_string = ','.join([str(uid) for uid in user_ids])
+        return Message(self._post('messages', {'subject': subject, 'message': message, 'recipient_ids': users_string}))
+
     # Implement search, resource collections, resource templates
+
+    def _post_like(self, path_items):
+        """
+        Post a like request
+
+        :param path_items: The path with values to POST to
+        :return: Number of likes on the object.
+        """
+        try:
+            return self._post(path_items, {'like_action': True})['likes']
+        except TypeError:
+            raise NoDifferenceError('You have already liked this post.')
+
+    def _post_unlike(self, path_items):
+        """
+        Post an unlike request
+
+        :param path_items: The path with values to POST to
+        :return: Number of likes on the object
+        """
+        try:
+            return self._post(path_items, {'like_action': False})['likes']
+        except TypeError:
+            raise NoDifferenceError('You are already not liking this post.')
 
     def like(self, id):
         """
@@ -2060,7 +2128,7 @@ class Schoology:
         :param id: ID of object to like.
         :return: Number of likes on the object.
         """
-        return self._post('like/%s' % id, {'like_action': True})['likes']
+        return self._post_like('like/%s' % id)
 
     def unlike(self, id):
         """
@@ -2069,7 +2137,7 @@ class Schoology:
         :param id: ID of object to unlike.
         :return: Number of likes on the object.
         """
-        return self._post('like/%s' % id, {'like_action': False})['likes']
+        return self._post_unlike('like/%s' % id)
 
     def get_likes(self, id):
         """
@@ -2087,7 +2155,7 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to like.
         """
-        return self._post('like/%s/comment/%s' % (id, comment_id), {'like_action': True})['likes']
+        return self._post_like('like/%s/comment/%s' % (id, comment_id))
 
     def unlike_comment(self, id, comment_id):
         """
@@ -2096,7 +2164,7 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to unlike.
         """
-        return self._post('like/%s/comment/%s' % (id, comment_id), {'like_action': False})['likes']
+        return self._post_unlike('like/%s/comment/%s' % (id, comment_id))
 
     def vote(self, poll_id, choice_id):
         """
@@ -2108,7 +2176,6 @@ class Schoology:
         :param choice_id: ID of choice you'd like to make.
         """
         return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
-
 
     def get_user_actions(self, user_id, start=0, end=time.time()):
         """
@@ -2126,3 +2193,40 @@ class Schoology:
     # TODO: Implement multi-get(!) and multi-options requests. Don't seem to work right now.
 
     # TODO: Support all User-Specific Objects, User Information, etc. requests
+
+    def _search(self, keywords, search_type):
+        """
+        Get the items for a search of keywords and type.
+
+        :param keywords: The keywords you wish to search with.
+        :param type: The type of search (user, group, course)
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._get('/search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
+
+    def search_users(self, keywords):
+        """
+        Get the items for a search of keywords in users.
+
+        :param keywords: The keywords you wish to search with.
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._search(keywords, 'user')
+
+    def search_groups(self, keywords):
+        """
+        Get the items for a search of keywords in groups.
+
+        :param keywords: The keywords you wish to search with.
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._search(keywords, 'group')
+
+    def search_courses(self, keywords):
+        """
+        Get the items for a search of keywords in courses.
+
+        :param keywords: The keywords you wish to search with.
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._search(keywords, 'course')
