@@ -172,12 +172,12 @@ class Schoology:
         """
         return User(self._get(('users/' + ('inactive/' if inactive else '') + '%s') % user_id))
 
-    def create_user(self, user_id, user):
+    def create_user(self, user, user_id):
         """
         Create a new user.
 
-        :param user_id: ID of user you wish to create.
         :param user: User object containing necessary fields.
+        :param user_id: ID of user you wish to create.
         :return: User object obtained from API.
         """
         return User(self._post('users/%s' % user_id, user.json()))
@@ -192,15 +192,15 @@ class Schoology:
         userList = [user.json() for user in users]
         return [User(raw) for raw in self._post('users', json.dumps(userList))]
 
-    def update_user(self, user_id, user):
+    def update_user(self, user, user_id):
         """
         Update an existing user.
 
-        :param user_id: ID of user you wish to update.
         :param user: User object containing necessary fields.
+        :param user_id: ID of user you wish to update.
         :return: User object obtained from API.
         """
-        return User(self._put('users/%s' % user_id, user.json()))
+        self._put('users/%s' % user_id, user.json())
 
     def update_users(self, users):
         """
