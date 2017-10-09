@@ -160,8 +160,7 @@ class Schoology:
         :param inactive: Gets inactive users instead of normal ones.
         :return: List of User objects.
         """
-        path = 'users' + ('/inactive' if inactive else '')
-        return [User(raw) for raw in self._get(path)['user']]
+        return [User(raw) for raw in self._get('users' + ('/inactive' if inactive else ''))['user']]
 
     def get_user(self, user_id, inactive=False):
         """
