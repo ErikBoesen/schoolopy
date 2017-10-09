@@ -2084,15 +2084,15 @@ class Schoology:
         """
         return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
-    def send_message(self, subject, message, users):
+    def send_message(self, subject, message, user_ids):
         """
         Send a message to a user or users.
 
         :param subject: A string holding the subject of a message.
         :param message: A string holding the body of a message.
-        :param users: A list of users to send the message to.
+        :param user_ids: A list of user ids to send the message to.
         """
-        users_string = ','.join([str(user.id) for user in users])
+        users_string = ','.join([str(uid) for uid in user_ids])
         return Message(self._post('messages', {'subject': subject, 'message': message, 'recipient_ids': users_string}))
 
     # Implement search, resource collections, resource templates
