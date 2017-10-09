@@ -2084,6 +2084,17 @@ class Schoology:
         """
         return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
+    def send_message(self, subject, message, users):
+        """
+        Send a message to a user or users.
+
+        :param subject: A string holding the subject of a message.
+        :param message: A string holding the body of a message.
+        :param users: A list of users to send the message to.
+        """
+        users_string = ','.join([str(user.id) for user in users])
+        return Message(self._post('messages', {'subject': subject, 'message': message, 'recipient_ids': users_string}))
+
     # Implement search, resource collections, resource templates
 
     def _post_like(self, path_items):
@@ -2183,11 +2194,39 @@ class Schoology:
 
     # TODO: Support all User-Specific Objects, User Information, etc. requests
 
-    def search(self, keywords, search_type):
+    def _search(self, keywords, search_type):
         """
         Get the items for a search of keywords and type.
 
         :param keywords: The keywords you wish to search with.
         :param type: The type of search (user, group, course)
+        :return: A list of dictionaries representing search outputs
         """
         return self._get('/search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
+
+    def search_users(self, keywords):
+        """
+        Get the items for a search of keywords in users.
+
+        :param keywords: The keywords you wish to search with.
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._search(keywords, 'user')
+
+    def search_groups(self, keywords):
+        """
+        Get the items for a search of keywords in groups.
+
+        :param keywords: The keywords you wish to search with.
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._search(keywords, 'group')
+
+    def search_courses(self, keywords):
+        """
+        Get the items for a search of keywords in courses.
+
+        :param keywords: The keywords you wish to search with.
+        :return: A list of dictionaries representing search outputs
+        """
+        return self._search(keywords, 'course')
