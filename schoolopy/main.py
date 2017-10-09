@@ -216,7 +216,7 @@ class Schoology:
         """
         Delete a user.
 
-        :param user_id: ID of user you wish to delte.
+        :param user_id: ID of user you wish to delete.
         """
         self._delete('users/%s' % user_id)
 
