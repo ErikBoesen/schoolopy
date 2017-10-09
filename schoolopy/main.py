@@ -190,8 +190,7 @@ class Schoology:
         """
         if len(users) > 50:
             raise AttributeError("Your list of users must hold no more than 50 people.")
-        return [User(raw) for raw in self._post('users',
-                                                data={'users': [user.json() for user in users]})]
+        return [User(raw) for raw in self._post('users', {'users': {'user': [user.json() for user in users]}})]
 
     def update_user(self, user, user_id):
         """
@@ -212,8 +211,7 @@ class Schoology:
         """
         if len(users) > 50:
             raise AttributeError("Your list of users must hold no more than 50 people.")
-        return [User(raw) for raw in self._put(path='users',
-                                               data={'users': [user.json() for user in users]})]
+        return [User(raw) for raw in self._put('users', {'users': {'user': [user.json() for user in users]}})]
 
     def delete_user(self, user_id):
         """
@@ -364,7 +362,7 @@ class Schoology:
         :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
         :return: List of Enrollment objects recieved from Schoology API.
         """
-        return [Enrollment(raw) for raw in self._post('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment for enrollment in enrollments]}})]
+        return [Enrollment(raw) for raw in self._post('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
     def create_group_enrollments(self, enrollments, group_id):
         """
@@ -374,7 +372,7 @@ class Schoology:
         :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
         :return: List of Enrollment objects recieved from API.
         """
-        return [Enrollment(raw) for raw in self._post('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment for enrollment in enrollments]}})]
+        return [Enrollment(raw) for raw in self._post('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
     def update_enrollment(self, enrollment, group_id=None, section_id=None):
         """
@@ -401,10 +399,10 @@ class Schoology:
         return update_group_enrollments(group_id, [enrollment])
 
     def update_section_enrollments(self, enrollments, section_id):
-        return [Enrollment(raw) for raw in self._put('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment for enrollment in enrollments]}})]
+        return [Enrollment(raw) for raw in self._put('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
     def update_group_enrollments(self, enrollments, group_id):
-        return [Enrollment(raw) for raw in self._put('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment for enrollment in enrollments]}})]
+        return [Enrollment(raw) for raw in self._put('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
     def delete_enrollment(self, enrollment_id, section_id=None, group_id=None):
         """
@@ -1930,7 +1928,7 @@ class Schoology:
         :param categories: List of GradingCategory objects to create.
         :param section_id: ID of section in which to create categories.
         """
-        return [GradingCategory(raw) for raw in self._post('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category for category in categories]}})['grading_category']]
+        return [GradingCategory(raw) for raw in self._post('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category.json() for category in categories]}})['grading_category']]
 
     def delete_grading_category(self, category_id, section_id):
         """
@@ -1949,7 +1947,7 @@ class Schoology:
         :param groups: List of GradingGroup objects to create.
         :param section_id: ID of section in which to create groups.
         """
-        return [GradingGroup(raw) for raw in self._put('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group for group in groups]}})['grading_group']]
+        return [GradingGroup(raw) for raw in self._put('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group.json() for group in groups]}})['grading_group']]
 
     def get_grading_groups(self, section_id):
         """
@@ -1985,7 +1983,7 @@ class Schoology:
         :param groups: List of GradingGroup objects to create.
         :param section_id: ID of section in which to create groups.
         """
-        return [GradingGroup(raw) for raw in self._post('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group for group in groups]}})['grading_group']]
+        return [GradingGroup(raw) for raw in self._post('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group.json() for group in groups]}})['grading_group']]
 
     def delete_grading_group(self, group_id, section_id):
         """
@@ -2088,18 +2086,29 @@ class Schoology:
 
     # Implement search, resource collections, resource templates
 
-    def _like_item(self, path_items, unlike=False):
+    def _post_like(self, path_items):
         """
         Post a like request
 
-        :param pathItems: The path with values to POST to
-        :param unlike: Whether to unlike or like (Default like)
+        :param path_items: The path with values to POST to
         :return: Number of likes on the object.
         """
         try:
-            return self._post(path_items, {'like_action': (not unlike)})['likes']
+            return self._post(path_items, {'like_action': True})['likes']
         except TypeError:
-            raise NoDifferenceError('You have already ' + ('unliked' if unlike else 'liked') + ' this post.')
+            raise NoDifferenceError('You have already liked this post.')
+
+    def _post_unlike(self, path_items):
+        """
+        Post an unlike request
+
+        :param path_items: The path with values to POST to
+        :return: Number of likes on the object
+        """
+        try:
+            return self._post(path_items, {'like_action': False})['likes']
+        except TypeError:
+            raise NoDifferenceError('You are already not liking this post.')
 
     def like(self, id):
         """
@@ -2108,7 +2117,7 @@ class Schoology:
         :param id: ID of object to like.
         :return: Number of likes on the object.
         """
-        return self._like_item('like/%s' % id)
+        return self._post_like('like/%s' % id)
 
     def unlike(self, id):
         """
@@ -2117,7 +2126,7 @@ class Schoology:
         :param id: ID of object to unlike.
         :return: Number of likes on the object.
         """
-        return self._like_item('like/%s' % id, unlike=True)
+        return self._post_unlike('like/%s' % id)
 
     def get_likes(self, id):
         """
@@ -2135,7 +2144,7 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to like.
         """
-        return self._like_item('like/%s/comment/%s' % (id, comment_id))
+        return self._post_like('like/%s/comment/%s' % (id, comment_id))
 
     def unlike_comment(self, id, comment_id):
         """
@@ -2144,7 +2153,7 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to unlike.
         """
-        return self._like_item('like/%s/comment/%s' % (id, comment_id), unlike=True)
+        return self._post_unlike('like/%s/comment/%s' % (id, comment_id))
 
     def vote(self, poll_id, choice_id):
         """
@@ -2156,7 +2165,6 @@ class Schoology:
         :param choice_id: ID of choice you'd like to make.
         """
         return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
-
 
     def get_user_actions(self, user_id, start=0, end=time.time()):
         """
