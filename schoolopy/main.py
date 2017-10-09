@@ -46,7 +46,12 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.post(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+            return requests.post(self._ROOT + path, data=data, headers={
+                'Authorization': self._oauth_header(),
+                'Accept': 'application/json',
+                'Host': 'api.schoology.com',
+                'Content-Type': 'application/json'
+                }).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -59,7 +64,12 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.put(self._ROOT + path, data=data, headers={'Authorization': self._oauth_header()}).json()
+            return requests.put(self._ROOT + path, data=data, headers={
+                'Authorization': self._oauth_header(),
+                'Accept': 'application/json',
+                'Host': 'api.schoology.com',
+                'Content-Type': 'application/json'
+                }).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -69,8 +79,12 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        requests.delete(self._ROOT + path, headers={'Authorization': self._oauth_header()})
-
+        requests.delete(self._ROOT + path, headers={
+            'Authorization': self._oauth_header(),
+            'Accept': 'application/json',
+            'Host': 'api.schoology.com',
+            'Content-Type': 'application/json'
+            })
 
     def get_schools(self):
         """
@@ -149,14 +163,14 @@ class Schoology:
             return []
         return [User(raw) for raw in self._get(path)['user']]
 
-    def get_user(self, user_id):
+    def get_user(self, user_id, inactive=False):
         """
         Get data on an individual user.
 
         :param user_id: ID of user on whom to get data.
         :return: User object.
         """
-        return User(self._get('users/%s' % user_id))
+        return User(self._get(('users/' + ('inactive/' if inactive else '') + '%s') % user_id))
 
     def create_user(self, user_id, user):
         """
@@ -166,7 +180,7 @@ class Schoology:
         :param user: User object containing necessary fields.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s' % user_id, user.json())
+        return User(self._post('users/%s' % user_id, user.json()))
 
     def create_users(self, users):
         """
@@ -175,8 +189,8 @@ class Schoology:
         :param users: A list of users
         :return: User objects obtained from API.
         """
-        userDictionary = {'users' : [user.json() for user in users]}
-        return [User(raw) for raw in self._post('users', userDictionary['users'])]
+        userList = [user.json() for user in users]
+        return [User(raw) for raw in self._post('users', json.dumps(userList))]
 
     def update_user(self, user_id, user):
         """
@@ -186,7 +200,25 @@ class Schoology:
         :param user: User object containing necessary fields.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s?update_existing=1' % user_id, user.json()))
+        return User(self._put('users/%s' % user_id, user.json()))
+
+    def update_users(self, users):
+        """
+        Bulk update users.
+
+        :param users: A list of users
+        :return: User objects obtained from API.
+        """
+        userList = [user.json() for user in users]
+        return [User(raw) for raw in self._put('users', json.dumps(userList))]
+
+    def delete_user(self, user_id):
+        """
+        Delete a user.
+
+        :param user_id: ID of user you wish to delte.
+        """
+        self._delete('users/%s' % user_id)
 
     def get_languages(self):
         """
@@ -2053,6 +2085,21 @@ class Schoology:
 
     # Implement search, resource collections, resource templates
 
+    def _like_item(self, pathItems, unlike=False):
+        """
+        Post a like request
+
+        :param pathItems: The path with values to POST to
+        :param unlike: Whether to unlike or like (Default like)
+        :return: Number of likes on the object.
+        """
+        try:
+            return self._post(pathItems, json.dumps({'like_action': True and (not unlike)}))['likes']
+        except TypeError:
+            return "The status you posted is already present."
+        except KeyError:
+            return None
+
     def like(self, id):
         """
         Like an object.
@@ -2060,7 +2107,7 @@ class Schoology:
         :param id: ID of object to like.
         :return: Number of likes on the object.
         """
-        return self._post('like/%s' % id, {'like_action': True})['likes']
+        return self._like_item('like/%s' % id)
 
     def unlike(self, id):
         """
@@ -2069,7 +2116,7 @@ class Schoology:
         :param id: ID of object to unlike.
         :return: Number of likes on the object.
         """
-        return self._post('like/%s' % id, {'like_action': False})['likes']
+        return self._like_item('like/%s' % id, unlike=True)
 
     def get_likes(self, id):
         """
@@ -2087,7 +2134,7 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to like.
         """
-        return self._post('like/%s/comment/%s' % (id, comment_id), {'like_action': True})['likes']
+        return self._like_item('like/%s/comment/%s' % (id, comment_id))
 
     def unlike_comment(self, id, comment_id):
         """
@@ -2096,7 +2143,7 @@ class Schoology:
         :param id: ID of object on which the comment was written.
         :param comment_id: ID of comment to unlike.
         """
-        return self._post('like/%s/comment/%s' % (id, comment_id), {'like_action': False})['likes']
+        return self._like_item('like/%s/comment/%s' % (id, comment_id), unlike=True)
 
     def vote(self, poll_id, choice_id):
         """
