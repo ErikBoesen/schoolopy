@@ -1892,7 +1892,7 @@ class Schoology:
         :param categories: List of GradingCategory objects to create.
         :param section_id: ID of section in which to create categories.
         """
-        return [GradingCategory(raw) for raw in self._put('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category for category in categories]}})['grading_category']]
+        return [GradingCategory(raw) for raw in self._put('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category.json() for category in categories]}})['grading_category']]
 
     def get_grading_categories(self, section_id):
         """
