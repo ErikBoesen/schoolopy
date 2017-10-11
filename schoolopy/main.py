@@ -1160,7 +1160,7 @@ class Schoology:
         self._delete('groups/%s/discussions/%s/comments/%s' % (group_id, discussion_id, reply_id))
 
 
-    def create_update(self, update, user_id=None, section_id=None, group_id=None):
+    def create_update(self, update, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for creating an update in any realm.
 
@@ -1175,6 +1175,8 @@ class Schoology:
             self.create_school_update(update, school_id)
         elif group_id:
             self.create_group_update(update, group_id)
+        elif building_id:
+            self.create_building_update(update, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1187,8 +1189,11 @@ class Schoology:
     def create_group_update(update, group_id):
         return Update(self._post('groups/%s/updates', update.json()))
 
+    def create_building_update(update, building_id):
+        return Update(self._post('buildings/%s/updates', update.json()))
 
-    def get_updates(self, user_id=None, section_id=None, group_id=None):
+
+    def get_updates(self, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for getting updates in any realm.
 
@@ -1197,11 +1202,13 @@ class Schoology:
         :param *_id: ID of realm in which updates are published.
         """
         if user_id:
-            self.get_user_updates(user_id)
+            return self.get_user_updates(user_id)
         elif section_id:
-            self.get_user_updates(section_id)
+            return self.get_user_updates(section_id)
         elif group_id:
-            self.get_user_updates(group_id)
+            return self.get_user_updates(group_id)
+        elif building_id:
+            return self.get_user_updates(building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1213,6 +1220,9 @@ class Schoology:
 
     def get_group_updates(self, group_id):
         return [Update(raw) for raw in self._get('groups/%s/updates' % group_id)['update']]
+
+    def get_building_updates(self, building_id):
+        return [Update(raw) for raw in self._get('buildings/%s/updates' % building_id)['update']]
 
 
     def get_feed(self):
@@ -1227,7 +1237,7 @@ class Schoology:
         return [Update(raw) for raw in self._get('recent')['update']]
 
 
-    def get_update(self, update_id, user_id=None, section_id=None, group_id=None):
+    def get_update(self, update_id, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for getting updates in any realm.
 
@@ -1241,6 +1251,8 @@ class Schoology:
             self.get_section_update(update_id, section_id)
         elif group_id:
             self.get_group_update(update_id, group_id)
+        elif building_id:
+            self.get_building_update(update_id, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1253,8 +1265,11 @@ class Schoology:
     def get_group_update(self, update_id, group_id):
         return Update(self._get('groups/%s/updates/%s' % (group_id, update_id)))
 
+    def get_building_update(self, update_id, building_id):
+        return Update(self._get('buildings/%s/updates/%s' % (building_id, update_id)))
 
-    def delete_update(self, update_id, user_id=None, section_id=None, group_id=None):
+
+    def delete_update(self, update_id, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for deleting an update in any realm.
 
@@ -1269,6 +1284,8 @@ class Schoology:
             self.delete_section_update(update_id, section_id)
         elif group_id:
             self.delete_group_update(update_id, group_id)
+        elif building_id:
+            self.delete_building_update(update_id, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1281,8 +1298,11 @@ class Schoology:
     def delete_group_update(self, update_id, group_id):
         return Update(self._delete('groups/%s/updates/%s' % (group_id, update_id)))
 
+    def delete_building_update(self, update_id, building_id):
+        return Update(self._delete('buildings/%s/updates/%s' % (building_id, update_id)))
 
-    def update_update(self, update, user_id=None, section_id=None, group_id=None):
+
+    def update_update(self, update, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for updating an update in any realm.
 
@@ -1297,6 +1317,8 @@ class Schoology:
             return self.update_section_update(update, section_id)
         elif group_id:
             return self.update_group_update(update, group_id)
+        elif building_id:
+            return self.update_building_update(update, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1309,8 +1331,11 @@ class Schoology:
     def update_group_update(update, group_id):
         return Update(self._put('groups/%s/updates', update.json()))
 
+    def update_building_update(update, building_id):
+        return Update(self._put('buildings/%s/updates', update.json()))
 
-    def create_update_comment(self, comment, update_id, user_id=None, section_id=None, group_id=None):
+
+    def create_update_comment(self, comment, update_id, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for creating a comment on an update in any realm.
 
@@ -1326,6 +1351,8 @@ class Schoology:
             return self.create_section_update_comment(comment, update_id, section_id)
         elif group_id:
             return self.create_group_update_comment(comment, update_id, group_id)
+        elif building_id:
+            return self.create_building_update_comment(comment, update_id, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1338,8 +1365,11 @@ class Schoology:
     def create_group_update(update, group_id):
         return Update(self._post('groups/%s/updates', comment.json()))
 
+    def create_building_update(update, building_id):
+        return Update(self._post('buildings/%s/updates', comment.json()))
 
-    def get_update_comments(self, comment, update_id, user_id=None, section_id=None, group_id=None):
+
+    def get_update_comments(self, comment, update_id, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for creating a comment on an update in any realm.
 
@@ -1354,6 +1384,8 @@ class Schoology:
             return self.get_section_update_comments(update_id, section_id)
         elif group_id:
             return self.get_group_update_comments(update_id, group_id)
+        elif building_id:
+            return self.get_building_update_comments(update_id, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1366,8 +1398,11 @@ class Schoology:
     def get_group_update_comments(self, update_id, group_id):
         return [UpdateComment(raw) for raw in self._get('groups/%s/updates/%s/comments' % (group_id, update_id))['comment']]
 
+    def get_building_update_comments(self, update_id, building_id):
+        return [UpdateComment(raw) for raw in self._get('buildings/%s/updates/%s/comments' % (building_id, update_id))['comment']]
 
-    def get_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
+
+    def get_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for getting data on an individual update comment in any realm.
 
@@ -1396,7 +1431,7 @@ class Schoology:
         return UpdateComment(self._get('groups/%s/updates/%s/comments/%s' % (group_id, update_id, comment_id)))
 
 
-    def delete_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
+    def delete_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None, building_id=None):
         """
         Helper function for getting data on an individual update comment in any realm.
 
@@ -1412,6 +1447,8 @@ class Schoology:
             self.delete_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
             self.delete_group_update_comment(comment_id, update_id, group_id)
+        elif building_id:
+            self.delete_building_update_comment(comment_id, update_id, building_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1423,6 +1460,9 @@ class Schoology:
 
     def delete_group_update_comment(self, comment_id, update_id, group_id):
         self._delete('groups/%s/updates/%s/comments/%s' % (group_id, update_id, comment_id))
+
+    def delete_building_update_comment(self, comment_id, update_id, building_id):
+        self._delete('buildings/%s/updates/%s/comments/%s' % (building_id, update_id, comment_id))
 
     # TODO: Implement Reminder requests
     # It's unclear what endpoints we should use
