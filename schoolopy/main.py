@@ -242,7 +242,7 @@ class Schoology:
         return [Enrollment(raw) for raw in self._get('sections/%s/enrollments' % section_id)['enrollment']]
 
     def get_group_enrollments(self, group_id):
-        return [Enrollment(raw) for raw in self._get('groups/%s/enrollments' % group_id)['enrollments']]
+        return [Enrollment(raw) for raw in self._get('groups/%s/enrollments' % group_id)['enrollment']]
 
 
     # TODO: Do we need to provide the ID of the realm?
