@@ -24,6 +24,12 @@ class Message(_base_model):
 class MessageThread(Message):
     pass
 
+class NoDifferenceError(Exception):
+    """
+    This exception represents a case where schoology returns a String with the API
+    and makes it easier to tell what went wrong.
+    """
+    pass
 
 School = _model('School')
 Building = _model('Building')
@@ -51,3 +57,6 @@ Assignment = _model('Assignment')
 FriendRequest = _model('FriendRequest')
 Invite = _model('Invite')
 Grade = _model('Grade')
+Language = _model('Language')
+Association = _model('Association')
+WebsiteClient = _model('WebsiteClient')
