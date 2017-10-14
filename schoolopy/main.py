@@ -189,7 +189,7 @@ class Schoology:
         :return: User objects obtained from API.
         """
         if len(users) > 50:
-            raise AttributeError("Your list of users must hold no more than 50 people.")
+            raise AttributeError('Your list of users must hold no more than 50 people.')
         return [User(raw) for raw in self._post('users', {'users': {'user': [user.json() for user in users]}})]
 
     def update_user(self, user, user_id):
@@ -210,7 +210,7 @@ class Schoology:
         :return: User objects obtained from API.
         """
         if len(users) > 50:
-            raise AttributeError("Your list of users must hold no more than 50 people.")
+            raise AttributeError('Your list of users must hold no more than 50 people.')
         return [User(raw) for raw in self._put('users', {'users': {'user': [user.json() for user in users]}})]
 
     def delete_user(self, user_id):
@@ -2189,10 +2189,53 @@ class Schoology:
         """
         return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%d&end_time=%d' % (user_id, start, end))['actions']]
 
-    # TODO: Implement other analytics endpoints
-    # TODO: Implement multi-get(!) and multi-options requests. Don't seem to work right now.
 
-    # TODO: Support all User-Specific Objects, User Information, etc. requests
+    # TODO: Implement other analytics endpoints
+
+    def multi_get(self, endpoints):
+        """
+        Generic function for running multiget requests.
+
+        Used for abstraction by other multi_get functions.
+
+        :param endpoints: List of endpoints to which to make requests. API endpoint will be appended to the start.
+        """
+        if len(endpoints) > 50:
+            raise AttributeError('No more than 50 endpoints may be requested at the same time.')
+        return self._post('multiget', {'requests': {'request': [('/v1/%s' % endpoint) for endpoint in endpoints]}})
+
+    def multi_get_groups(self, group_ids):
+        """
+        Get multiple groups by ID.
+
+        :param group_ids: List of IDs of groups to get.
+        """
+        return [Group(raw) for raw in self.multi_get([('groups/%s' % group_id) for group_id in group_ids])]
+
+    def multi_get_courses(self, course_ids):
+        """
+        Get multiple courses by ID.
+
+        :param course_ids: List of IDs of courses to get.
+        """
+        return [Course(raw) for raw in self.multi_get([('courses/%s' % course_id) for course_id in course_ids])]
+
+    def multi_get_sections(self, section_ids):
+        """
+        Get multiple sections by ID.
+
+        :param section_ids: List of IDs of sections to get.
+        """
+        return [Section(raw) for raw in self.multi_get([('/v1/sections/%s' % section_id) for section_id in section_ids])]
+
+    def multi_get_users(self, user_ids):
+        """
+        Get multiple users by ID.
+
+        :param user_ids: List of IDs of users to get.
+        """
+        return [User(raw) for raw in self.multi_get([('/v1/users/%s' % user_id) for user_id in user_ids])]
+
 
     def _search(self, keywords, search_type):
         """
