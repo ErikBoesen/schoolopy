@@ -55,7 +55,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.post(self._ROOT + path, data=data, headers=self._request_header()).json()
+            return requests.post(self._ROOT + path, json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -68,7 +68,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.put(self._ROOT + path, data=data, headers=self._request_header()).json()
+            return requests.put(self._ROOT + path, json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -167,6 +167,7 @@ class Schoology:
         Get data on an individual user.
 
         :param user_id: ID of user on whom to get data.
+        :param inactive: Gets inactive users instead of normal ones.
         :return: User object.
         """
         return User(self._get(('users/' + ('inactive/' if inactive else '') + '%s') % user_id))
@@ -2119,7 +2120,7 @@ class Schoology:
         try:
             return self._post(path, {'like_action': False})['likes']
         except TypeError:
-            raise NoDifferenceError('You are already not liking this post.')
+            raise NoDifferenceError('You have already unliked this post.')
 
     def like(self, id):
         """
@@ -2177,17 +2178,20 @@ class Schoology:
         """
         return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
 
-    def get_user_actions(self, user_id, start=0, end=time.time()):
+    def get_user_actions(self, user_id, start=None, end=int(time.time())):
         """
         Get analysis of a user's actions over a given period of time.
 
         This endpoint is typically only available to site admins.
 
         :param user_id: ID of user to get actions of.
-        :param start: Timestamp at which to start action list.
+        :param start: Timestamp at which to start action list. Defaults to 7 days before end.
         :param end: Timestamp at which to end action list.
         """
-        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%d&end_time=%d' % (user_id, start, end))['actions']]
+        start = end-604800 if start == None else start
+        if start < end-604800:
+            raise AttributeError('Start timestamp must be no earlier than 7 days before end timestamp.')
+        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s' % (user_id, start, int(end)))['actions']]
 
 
     # TODO: Implement other analytics endpoints
@@ -2202,7 +2206,7 @@ class Schoology:
         """
         if len(endpoints) > 50:
             raise AttributeError('No more than 50 endpoints may be requested at the same time.')
-        return self._post('multiget', {'requests': {'request': [('/v1/%s' % endpoint) for endpoint in endpoints]}})
+        return self._post('multiget', {'requests': {'request': [('/v1/%s' % endpoint) for endpoint in endpoints]}})['response']
 
     def multi_get_groups(self, group_ids):
         """
@@ -2226,7 +2230,7 @@ class Schoology:
 
         :param section_ids: List of IDs of sections to get.
         """
-        return [Section(raw) for raw in self.multi_get([('/v1/sections/%s' % section_id) for section_id in section_ids])]
+        return [Section(raw) for raw in self.multi_get([('sections/%s' % section_id) for section_id in section_ids])]
 
     def multi_get_users(self, user_ids):
         """
@@ -2234,8 +2238,7 @@ class Schoology:
 
         :param user_ids: List of IDs of users to get.
         """
-        return [User(raw) for raw in self.multi_get([('/v1/users/%s' % user_id) for user_id in user_ids])]
-
+        return [User(raw) for raw in self.multi_get([('users/%s' % user_id) for user_id in user_ids])]
 
     def _search(self, keywords, search_type):
         """
