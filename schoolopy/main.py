@@ -139,7 +139,7 @@ class Schoology:
 
     def get_self_user_info(self):
         """
-        Gets user info for yourself, if you have a current Schoology sessions
+        Gets user info for yourself, if you have a current Schoology sessions.
 
         :return: WebsiteClient object obtained from API.
         """
@@ -147,11 +147,11 @@ class Schoology:
 
     def get_me(self):
         """
-        Get data of the client using this method (Yourself)
+        Get data of the client using this method (Yourself).
 
         :return: User object obtained from API. (Of yourself)
         """
-        return User(self.get_user(self.get_self_user_info()['api_uid']))
+        return User(self.get_user(self.get_self_user_info().api_uid))
 
     def get_users(self, inactive=False):
         """
@@ -166,7 +166,7 @@ class Schoology:
         """
         Get data on an individual user.
 
-        :param user_id: ID of user on whom to get data.
+        :param user_id: ID of user to get data from.
         :param inactive: Gets inactive users instead of normal ones.
         :return: User object.
         """
@@ -186,7 +186,7 @@ class Schoology:
         """
         Bulk create users.
 
-        :param users: A list of users
+        :param users: A list of User objects.
         :return: User objects obtained from API.
         """
         if len(users) > 50:
@@ -207,7 +207,7 @@ class Schoology:
         """
         Bulk update users.
 
-        :param users: A list of users
+        :param users: A list of users.
         :return: User objects obtained from API.
         """
         if len(users) > 50:
@@ -2100,9 +2100,9 @@ class Schoology:
 
     def _like(self, path):
         """
-        Post a like request
+        Post a like request.
 
-        :param path: The path with values to POST to
+        :param path: The path with values to POST to.
         :return: Number of likes on the object.
         """
         try:
@@ -2112,10 +2112,10 @@ class Schoology:
 
     def _unlike(self, path):
         """
-        Post an unlike request
+        Post an unlike request.
 
-        :param path: The path with values to POST to
-        :return: Number of likes on the object
+        :param path: The path with values to POST to.
+        :return: Number of likes on the object.
         """
         try:
             return self._post(path, {'like_action': False})['likes']
@@ -2191,7 +2191,7 @@ class Schoology:
         start = end-604800 if start == None else start
         if start < end-604800:
             raise AttributeError('Start timestamp must be no earlier than 7 days before end timestamp.')
-        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s' % (user_id, start, int(end)))['actions']]
+        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s' % (user_id, start, end))['actions']]
 
 
     # TODO: Implement other analytics endpoints
@@ -2245,8 +2245,8 @@ class Schoology:
         Get the items for a search of keywords and type.
 
         :param keywords: The keywords you wish to search with.
-        :param type: The type of search (user, group, course)
-        :return: A list of dictionaries representing search outputs
+        :param type: The type of search (user, group, course).
+        :return: A list of dictionaries representing search outputs.
         """
         return self._get('/search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
 
@@ -2255,7 +2255,7 @@ class Schoology:
         Get the items for a search of keywords in users.
 
         :param keywords: The keywords you wish to search with.
-        :return: A list of dictionaries representing search outputs
+        :return: A list of dictionaries representing search outputs.
         """
         return self._search(keywords, 'user')
 
@@ -2264,7 +2264,7 @@ class Schoology:
         Get the items for a search of keywords in groups.
 
         :param keywords: The keywords you wish to search with.
-        :return: A list of dictionaries representing search outputs
+        :return: A list of dictionaries representing search outputs.
         """
         return self._search(keywords, 'group')
 
@@ -2273,6 +2273,6 @@ class Schoology:
         Get the items for a search of keywords in courses.
 
         :param keywords: The keywords you wish to search with.
-        :return: A list of dictionaries representing search outputs
+        :return: A list of dictionaries representing search outputs.
         """
         return self._search(keywords, 'course')
