@@ -137,13 +137,13 @@ class Schoology:
         """
         return Building(self._post('schools/%s/buildings' % school_id, building.json()))
 
-    def get_self_user_info(self):
+    def get_session(self):
         """
-        Gets user info for yourself, if you have a current Schoology sessions.
+        Get info on current session.
 
-        :return: WebsiteClient object obtained from API.
+        :return: Session object obtained from API.
         """
-        return WebsiteClient(self._get('app-user-info'))
+        return Session(self._get('app-user-info'))
 
     def get_me(self):
         """
@@ -189,8 +189,6 @@ class Schoology:
         :param users: A list of User objects.
         :return: User objects obtained from API.
         """
-        if len(users) > 50:
-            raise AttributeError('Your list of users must hold no more than 50 people.')
         return [User(raw) for raw in self._post('users', {'users': {'user': [user.json() for user in users]}})]
 
     def update_user(self, user, user_id):
@@ -210,8 +208,6 @@ class Schoology:
         :param users: A list of users.
         :return: User objects obtained from API.
         """
-        if len(users) > 50:
-            raise AttributeError('Your list of users must hold no more than 50 people.')
         return [User(raw) for raw in self._put('users', {'users': {'user': [user.json() for user in users]}})]
 
     def delete_user(self, user_id):
@@ -286,8 +282,6 @@ class Schoology:
         """
         Helper function for creating an enrollment in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param enrollment: Enrollment object to post to API.
         :param *_id: ID of realm from which to get events.
         :return: Enrollment object recieved from API.
@@ -311,9 +305,8 @@ class Schoology:
 
         You must provide either a section_id or group_id, and name your parameters.
 
-        :param section_id: ID of section whose enrollments to get.
-        :param group_id: ID of group whose enrollments to get.
-        :return: List of User objects.
+        :param *_id: ID of realm from which to get events.
+        :return: List of Enrollment objects.
         """
         if section_id:
             return self.get_section_enrollments(section_id)
@@ -331,21 +324,18 @@ class Schoology:
 
     # TODO: Do we need to provide the ID of the realm?
     def join_section(self, access_code):
-        return Enrollment(self._post('sections/accesscode' % access_code, {'access_code': access_code}))
+        return Enrollment(self._post('sections/accesscode', {'access_code': access_code}))
 
     def join_group(self, access_code):
-        return Enrollment(self._post('sections/accesscode' % access_code, {'access_code': access_code}))
+        return Enrollment(self._post('groups/accesscode', {'access_code': access_code}))
 
 
     def create_enrollments(self, enrollments, section_id=None, group_id=None):
         """
         Helper function to create multiple enrollments in any realm. Realm will be decided based on named parameters passed.
 
-        You must provide either a section_id or group_id, and name your parameters.
-
         :param enrollments: List of Enrollment objects to post to API.
-        :param section_id: ID of section whose enrollments to get.
-        :param group_id: ID of group whose enrollments to get.
+        :param *_id: ID of realm from which to get events.
         :return: List of User objects.
         """
         if section_id:
@@ -356,23 +346,9 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_section_enrollments(self, enrollments, section_id):
-        """
-        Create section enrollments in bulk.
-
-        :param section_id: ID of section in which to create enrollments.
-        :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
-        :return: List of Enrollment objects recieved from Schoology API.
-        """
         return [Enrollment(raw) for raw in self._post('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
     def create_group_enrollments(self, enrollments, group_id):
-        """
-        Create group enrollments in bulk.
-
-        :param group_id: ID of group in which to create enrollments.
-        :param enrollments: List of Enrollment objects to be created. Up to 50 enrollments can be created at a time.
-        :return: List of Enrollment objects recieved from API.
-        """
         return [Enrollment(raw) for raw in self._post('groups/%s/enrollments' % group_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
     def update_enrollment(self, enrollment, group_id=None, section_id=None):
@@ -381,9 +357,8 @@ class Schoology:
 
         Either group_id or section_id must be specified by name in calls to this method.
 
-        :param group_id: ID of group whose enrollment to edit.
-        :param section_id: ID of section whose enrollment to edit.
         :param enrollment: Enrollment object containing new data. Must contain at least uid and status properties.
+        :param *_id: ID of realm in which to update enrollment.
         :return: List of Enrollment objects recieved from API.
         """
         if section_id:
@@ -399,6 +374,23 @@ class Schoology:
     def update_group_enrollment(self, enrollment, group_id):
         return update_group_enrollments(group_id, [enrollment])
 
+    def update_enrollments(self, enrollments, group_id=None, section_id=None):
+        """
+        Helper function for updating multiple enrollments.
+
+        Either group_id or section_id must be specified by name in calls to this method.
+
+        :param enrollments: List of Enrollment objects containing new data. Must contain at least uid and status properties.
+        :param *_id: ID of realm in which to update enrollment.
+        :return: List of Enrollment objects recieved from API.
+        """
+        if section_id:
+            return self.update_section_enrollments(enrollments, section_id)
+        elif group_id:
+            return self.update_group_enrollments(enrollments, group_id)
+        else:
+            raise TypeError('Realm id property required.')
+
     def update_section_enrollments(self, enrollments, section_id):
         return [Enrollment(raw) for raw in self._put('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
 
@@ -409,11 +401,8 @@ class Schoology:
         """
         Helper function for deleting an enrollment in any realm.
 
-        Either group_id or section_id must be specified by name in calls to this method.
-
-        :param section_id: ID of section from which to delete enrollment.
-        :param group_id: ID of group from which to delete enrollment.
         :param enrollment_id: ID of enrollment to delete.
+        :param *_id: ID of realm from which to delete enrollment.
         """
         if section_id:
             return self.delete_section_enrollment(section_id, enrollment_id)
@@ -423,21 +412,20 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def delete_section_enrollment(self, enrollment_id, section_id):
-        delete_section_enrollments(section_id, [enrollment_id])
+        self.delete('sections/%s/enrollments/%s' % (section_id, enrollment_id))
 
     def delete_group_enrollment(self, enrollment_id, group_id):
-        delete_group_enrollments(group_id, [enrollment_id])
+        self.delete('groups/%s/enrollments/%s' % (group_id, enrollment_id))
 
+    # Deleting multiple enrollments apparently requires no realm.
     def delete_enrollments(self, enrollment_ids):
-        self._delete('enrollments?enrollment_ids=' + ','.join(enr))
+        self._delete('enrollments?enrollment_ids=' + ','.join(enrollment_ids))
 
-    # Course enrollments imports not implemented, similar effect can be obtained
+    # Course enrollments imports not implemented, similar effect can be obtained through extant methods
 
     def get_events(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on events in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm from which to get events.
         :return: List of Event objects.
@@ -474,8 +462,6 @@ class Schoology:
     def create_event(self, event, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for creating a new event in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param event: Event object.
         :param *_id: ID of realm in which to create event.
@@ -514,8 +500,6 @@ class Schoology:
         """
         Helper function for getting data on an individual event in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param event_id: ID of event on which to get data.
         :param *_id: ID of realm in which to create event.
         :return: Event object.
@@ -550,9 +534,7 @@ class Schoology:
 
     def update_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for updating individual events in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
+        Helper function for updating an individual event in any realm.
 
         :param event_id: ID of event on which to get data.
         :param *_id: ID of realm in which to create event.
@@ -589,8 +571,6 @@ class Schoology:
         """
         Helper function for deleting individual events in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param event_id: ID of event to delete.
         :param *_id: ID of realm in which to create event.
         """
@@ -626,8 +606,6 @@ class Schoology:
     def create_blog_post(self, post, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for creating blog posts in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param post: BlogPost object to post in the given realm.
         :param *_id: ID of realm in which to create event.
@@ -666,8 +644,6 @@ class Schoology:
         """
         Helper function for creating blog posts in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
         """
@@ -703,8 +679,6 @@ class Schoology:
     def get_blog_post(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for creating blog posts in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
@@ -742,8 +716,6 @@ class Schoology:
         """
         Helper function for creating blog posts in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
         """
@@ -780,8 +752,6 @@ class Schoology:
         """
         Helper function for deleting blog posts in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPost objects recieved from API.
         """
@@ -817,8 +787,6 @@ class Schoology:
     def create_blog_post_comment(self, comment, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for creating blog posts in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param post: BlogPost object to post in the given realm.
         :param *_id: ID of realm in which to create event.
@@ -857,8 +825,6 @@ class Schoology:
         """
         Helper function for getting data on blog post comments in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPostComment objects recieved from API.
         """
@@ -894,8 +860,6 @@ class Schoology:
     def get_blog_post_comment(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on individual blog post comments in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param comment_id: ID of the comment to fetch.
         :param post_id: ID of the post on which the comment is written.
@@ -935,8 +899,6 @@ class Schoology:
         """
         Helper function for deleting blog post comments in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param comment_id: ID of the comment to delete.
         :param post_id: ID of the post on which the comment is written.
         :param *_id: ID of realm in which to create event.
@@ -974,8 +936,6 @@ class Schoology:
         """
         Helper function for getting data on all discussions in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm in which to create event.
         :return: List of BlogPostComment objects recieved from API.
         """
@@ -1006,8 +966,6 @@ class Schoology:
     def create_discussion(self, discussion, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for creating a discussion in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param discussion: Discussion object to post.
         :param *_id: ID of realm in which to create event.
@@ -1041,8 +999,6 @@ class Schoology:
         """
         Helper function for getting data on individual discussion in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param discussion_id: ID of the discussion on which to get data.
         :param *_id: ID of realm from which to get discussion.
         :return: Discussion object recieved from API.
@@ -1074,8 +1030,6 @@ class Schoology:
     def delete_discussion(self, comment_id, post_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for deleting discussions in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param comment_id: ID of the comment to delete.
         :param post_id: ID of the post on which the comment is written.
@@ -1110,8 +1064,6 @@ class Schoology:
         """
         Helper function for creating discussion replies in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param reply: DiscussionReply object to post on the discussion with the given ID.
         :param *_id: ID of realm in which discussion resides.
         :return: BlogPost object recieved from API.
@@ -1144,8 +1096,6 @@ class Schoology:
         """
         Helper function for getting data on discussion replies in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param reply: DiscussionReply object to post on the discussion with the given ID.
         :param *_id: ID of realm in which discussion resides.
         :return: List of DiscussionReply objects recieved from API.
@@ -1177,8 +1127,6 @@ class Schoology:
     def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Helper function for getting individual discussion replies in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param comment_id: ID of the reply to get.
         :param discussion_id: ID of the discussion on which the reply is written.
@@ -1214,8 +1162,6 @@ class Schoology:
         """
         Helper function for deleting blog post comments in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param comment_id: ID of the comment to delete.
         :param post_id: ID of the post on which the comment is written.
         :param *_id: ID of realm in which to create event.
@@ -1248,8 +1194,6 @@ class Schoology:
         """
         Helper function for creating an update in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param update: Update object to post.
         :param *_id: ID of realm in which to create update.
         """
@@ -1275,8 +1219,6 @@ class Schoology:
     def get_updates(self, user_id=None, section_id=None, group_id=None):
         """
         Helper function for getting updates in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which updates are published.
         """
@@ -1315,8 +1257,6 @@ class Schoology:
         """
         Helper function for getting updates in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm in which updates are published.
         """
         if user_id:
@@ -1341,8 +1281,6 @@ class Schoology:
     def delete_update(self, update_id, user_id=None, section_id=None, group_id=None):
         """
         Helper function for deleting an update in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param update_id: ID of update to delete.
         :param *_id: ID of realm in which updates are published.
@@ -1370,8 +1308,6 @@ class Schoology:
         """
         Helper function for updating an update in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param update: Update object to post.
         :param *_id: ID of realm in which to create update.
         """
@@ -1397,8 +1333,6 @@ class Schoology:
     def create_update_comment(self, comment, update_id, user_id=None, section_id=None, group_id=None):
         """
         Helper function for creating a comment on an update in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param comment: UpdateComment object to post.
         :param update_id: ID of update on which to create comment.
@@ -1427,8 +1361,6 @@ class Schoology:
         """
         Helper function for creating a comment on an update in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param update_id: ID of update from which to get comments.
         :param *_id: ID of realm in which to create update comment.
         """
@@ -1454,8 +1386,6 @@ class Schoology:
     def get_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on an individual update comment in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param comment_id: ID of comment on which to get data.
         :param update_id: ID of update on which to create comment.
@@ -1483,8 +1413,6 @@ class Schoology:
     def delete_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
         """
         Helper function for getting data on an individual update comment in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param comment_id: ID of comment on which to get data.
         :param update_id: ID of update on which to create comment.
@@ -1515,8 +1443,6 @@ class Schoology:
         """
         Helper function for getting data on an individual update comment in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param album: Album object to post to API.
         :param *_id: ID of realm in which to create update comment.
         """
@@ -1537,8 +1463,6 @@ class Schoology:
     def get_media_albums(self, section_id=None, group_id=None):
         """
         Helper function for getting data on media albums in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm in which to create update comment.
         :return: List of MediaAlbum objects.
@@ -1561,8 +1485,6 @@ class Schoology:
         """
         Helper function for getting data on an individual media album in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm from which to get album.
         :return: MediaAlbum object.
         """
@@ -1583,8 +1505,6 @@ class Schoology:
     def update_media_album(self, album, section_id=None, group_id=None):
         """
         Helper function for updating an individual media album in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param *_id: ID of realm from which to get album.
         :return: MediaAlbum object.
@@ -1607,8 +1527,6 @@ class Schoology:
         """
         Helper function for deleting an individual media album in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param *_id: ID of realm from which to delete album.
         :return: MediaAlbum object.
         """
@@ -1629,8 +1547,6 @@ class Schoology:
     def get_media_album_content(self, content_id, album_id, section_id=None, group_id=None):
         """
         Helper function for getting data on a media item from an album in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
         that endpoint is no longer maintained. For forward-compatibility, it's better to deal
@@ -1656,8 +1572,6 @@ class Schoology:
     def update_media_album_content(self, content, content_id, album_id, section_id=None, group_id=None):
         """
         Helper function for updating a media item from an album in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
         that endpoint is no longer maintained. For forward-compatibility, it's better to deal
@@ -1686,8 +1600,6 @@ class Schoology:
         """
         Helper function for creating a media item in an album in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
         that endpoint is no longer maintained. For forward-compatibility, it's better to deal
         with this request as we do others.
@@ -1714,8 +1626,6 @@ class Schoology:
     def delete_media_album_content(self, content_id, album_id, section_id=None, group_id=None):
         """
         Helper function for updating a media item from an album in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
         that endpoint is no longer maintained. For forward-compatibility, it's better to deal
@@ -1744,8 +1654,6 @@ class Schoology:
         """
         Helper function for creating a document in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param document: Document object to post to API.
         :param *_id: ID of realm in which to create update comment.
         """
@@ -1766,8 +1674,6 @@ class Schoology:
     def get_documents(self, section_id=None, group_id=None):
         """
         Helper function for creating a document in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param document: Document object to post to API.
         :param *_id: ID of realm in which to create update comment.
@@ -1790,8 +1696,6 @@ class Schoology:
         """
         Helper function for getting data on an individual document in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param document: Document object to post to API.
         :param *_id: ID of realm in which to create update comment.
         """
@@ -1813,8 +1717,6 @@ class Schoology:
         """
         Helper function for updating an individual document in any realm.
 
-        Exactly one realm id property must be specified by name in calls to this method.
-
         :param document: Document object to post to API.
         :param *_id: ID of realm in which to create update comment.
         """
@@ -1835,8 +1737,6 @@ class Schoology:
     def delete_document(self, document_id, section_id=None, group_id=None):
         """
         Helper function for deleting an individual document in any realm.
-
-        Exactly one realm id property must be specified by name in calls to this method.
 
         :param document_id: ID of document to delete.
         :param *_id: ID of realm in which to create update comment.
@@ -2204,10 +2104,8 @@ class Schoology:
 
         :param endpoints: List of endpoints to which to make requests. API endpoint will be appended to the start.
         """
-        if len(endpoints) > 50:
-            raise AttributeError('No more than 50 endpoints may be requested at the same time.')
-        return self._post('multiget', {'requests': {'request': [('/v1/%s' % endpoint) for endpoint in endpoints]}})['response']
 
+        return self._post('multiget', {'requests': {'request': [('/v1/%s' % endpoint) for endpoint in endpoints]}})['response']
     def multi_get_groups(self, group_ids):
         """
         Get multiple groups by ID.
