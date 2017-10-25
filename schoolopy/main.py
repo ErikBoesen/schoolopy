@@ -9,6 +9,7 @@ class Schoology:
     _ROOT = 'https://api.schoology.com/v1/'
     key = ''
     secret = ''
+    limit = 20
 
     def __init__(self, key, secret):
         self.key = key
@@ -42,7 +43,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.get(self._ROOT + path, headers=self._request_header()).json()
+            return requests.get('%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 

@@ -6,6 +6,7 @@ with open('example_config.yml', 'r') as f:
     cfg = yaml.load(f)
 
 sc = schoolopy.Schoology(cfg['key'], cfg['secret'])
+sc.limit = 10  # Only retrieve 10 objects
 
 for update in sc.get_feed():
     user = sc.get_user(update.uid)
