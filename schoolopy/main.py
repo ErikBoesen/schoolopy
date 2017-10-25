@@ -408,7 +408,7 @@ class Schoology:
 
     def get_events(self, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on events in any realm.
+        Get data on events in any realm.
 
         :param *_id: ID of realm.
         :return: List of Event objects.
@@ -448,7 +448,7 @@ class Schoology:
 
         :param event: Event object.
         :param *_id: ID of realm.
-        :return: List of Event objects.
+        :return: Event object from API.
         """
         if district_id:
             return self.create_district_event(event, district_id)
@@ -481,7 +481,7 @@ class Schoology:
 
     def get_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on an event in any realm.
+        Get data on an event in any realm.
 
         :param event_id: ID of event on which to get data.
         :param *_id: ID of realm.
@@ -515,7 +515,7 @@ class Schoology:
     def get_group_event(self, event_id, group_id):
         return Event(self._get('groups/%s/events/%s' % (group_id, event_id)))
 
-    def update_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
+    def update_event(self, event, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Helper function for updating individual events in any realm.
 
@@ -523,36 +523,37 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if district_id:
-            self.get_district_event(event_id, district_id)
+            self.update_district_event(event, event_id, district_id)
         elif school_id:
-            self.get_school_event(event_id, school_id)
+            self.update_school_event(event, event_id, school_id)
         elif user_id:
-            self.get_user_event(event_id, user_id)
+            self.update_user_event(event, event_id, user_id)
         elif section_id:
-            self.get_section_event(event_id, section_id)
+            self.update_section_event(event, event_id, section_id)
         elif group_id:
-            self.get_group_event(event_id, group_id)
+            self.update_group_event(event, event_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
-    def update_district_event(self, event, district_id):
+    def update_district_event(self, event, event_id, district_id):
         self._put('districts/%s/events/%s' % (district_id, event.id), event.json())
 
-    def update_school_event(self, event, school_id):
+    def update_school_event(self, event, event_id, school_id):
         self._put('schools/%s/events/%s' % (school_id, event.id), event.json())
 
-    def update_user_event(self, event, user_id):
+    def update_user_event(self, event, event_id, user_id):
         self._put('users/%s/events/%s' % (user_id, event.id), event.json())
 
-    def update_section_event(self, event, section_id):
+    def update_section_event(self, event, event_id, section_id):
         self._put('sections/%s/events/%s' % (section_id, event.id), event.json())
 
-    def update_group_event(self, event, group_id):
+    def update_group_event(self, event, event_id, group_id):
         self._put('groups/%s/events/%s' % (group_id, event.id), event.json())
+
 
     def delete_event(self, event_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Delete individual events in any realm.
+        Delete an event in any realm.
 
         :param event_id: ID of event to delete.
         :param *_id: ID of realm.
@@ -661,7 +662,7 @@ class Schoology:
 
     def get_blog_post(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on a blog post in any realm.
+        Get data on a blog post in any realm.
 
         :param *_id: ID of realm.
         :return: List of BlogPost objects recieved from API.
@@ -805,7 +806,7 @@ class Schoology:
 
     def get_blog_post_comments(self, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on blog post comments in any realm.
+        Get data on blog post comments in any realm.
 
         :param *_id: ID of realm.
         :return: List of BlogPostComment objects recieved from API.
@@ -841,7 +842,7 @@ class Schoology:
 
     def get_blog_post_comment(self, comment_id, post_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on individual blog post comments in any realm.
+        Get data on individual blog post comments in any realm.
 
         :param comment_id: ID of the comment to fetch.
         :param post_id: ID of the post on which the comment is written.
@@ -916,7 +917,7 @@ class Schoology:
 
     def get_discussions(self, district_id=None, school_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on all discussions in any realm.
+        Get data on all discussions in any realm.
 
         :param *_id: ID of realm.
         :return: List of BlogPostComment objects recieved from API.
@@ -979,7 +980,7 @@ class Schoology:
 
     def get_discussion(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on individual discussion in any realm.
+        Get data on individual discussion in any realm.
 
         :param discussion_id: ID of the discussion on which to get data.
         :param *_id: ID of realm.
@@ -1075,7 +1076,7 @@ class Schoology:
 
     def get_discussion_replies(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on discussion replies in any realm.
+        Get data on discussion replies in any realm.
 
         :param reply: DiscussionReply object to post on the discussion with the given ID.
         :param *_id: ID of realm.
@@ -1107,7 +1108,7 @@ class Schoology:
 
     def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting individual discussion replies in any realm.
+        Get individual discussion replies in any realm.
 
         :param comment_id: ID of the reply to get.
         :param discussion_id: ID of the discussion on which the reply is written.
@@ -1199,7 +1200,7 @@ class Schoology:
 
     def get_updates(self, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting updates in any realm.
+        Get updates in any realm.
 
         :param *_id: ID of realm.
         """
@@ -1236,7 +1237,7 @@ class Schoology:
 
     def get_update(self, update_id, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting updates in any realm.
+        Get updates in any realm.
 
         :param *_id: ID of realm.
         """
@@ -1366,7 +1367,7 @@ class Schoology:
 
     def get_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on an update comment in any realm.
+        Get data on an update comment in any realm.
 
         :param comment_id: ID of comment on which to get data.
         :param update_id: ID of update on which to create comment.
@@ -1393,7 +1394,7 @@ class Schoology:
 
     def delete_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for getting data on an update comment in any realm.
+        Get data on an update comment in any realm.
 
         :param comment_id: ID of comment on which to get data.
         :param update_id: ID of update on which to create comment.
@@ -1422,7 +1423,7 @@ class Schoology:
 
     def create_media_album(self, album, section_id=None, group_id=None):
         """
-        Helper function for getting data on an update comment in any realm.
+        Get data on an update comment in any realm.
 
         :param album: Album object to post to API.
         :param *_id: ID of realm.
@@ -1443,7 +1444,7 @@ class Schoology:
 
     def get_media_albums(self, section_id=None, group_id=None):
         """
-        Helper function for getting data on media albums in any realm.
+        Get data on media albums in any realm.
 
         :param *_id: ID of realm.
         :return: List of MediaAlbum objects.
@@ -1464,7 +1465,7 @@ class Schoology:
 
     def get_media_album(self, album_id, section_id=None, group_id=None):
         """
-        Helper function for getting data on a media album in any realm.
+        Get data on a media album in any realm.
 
         :param *_id: ID of realm.
         :return: MediaAlbum object.
@@ -1527,7 +1528,7 @@ class Schoology:
 
     def get_media_album_content(self, content_id, album_id, section_id=None, group_id=None):
         """
-        Helper function for getting data on a media item from an album in any realm.
+        Get data on a media item from an album in any realm.
 
         Note: We could use the realm-ambiguous /album/[id] for this, but as of 2/15/15
         that endpoint is no longer maintained. For forward-compatibility, it's better to deal
@@ -1675,7 +1676,7 @@ class Schoology:
 
     def get_document(self, document_id, section_id=None, group_id=None):
         """
-        Helper function for getting data on a document in any realm.
+        Get data on a document in any realm.
 
         :param document: Document object to post to API.
         :param *_id: ID of realm.
@@ -2084,7 +2085,7 @@ class Schoology:
         :param type: The type of search (user, group, course)
         :return: A list of dictionaries representing search outputs
         """
-        return self._get('/search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
+        return self._get('search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
 
     def search_users(self, keywords):
         """
