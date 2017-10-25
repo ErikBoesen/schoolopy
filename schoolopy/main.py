@@ -141,9 +141,9 @@ class Schoology:
         """
         Gets user info for yourself, if you have a current Schoology sessions
 
-        :return: WebsiteClient object obtained from API.
+        :return: Session object obtained from API.
         """
-        return WebsiteClient(self._get('app-user-info'))
+        return Session(self._get('app-user-info'))
 
     def get_me(self):
         """
