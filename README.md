@@ -37,7 +37,7 @@ Most objects' functions follow a similar pattern to the following example.
 * `sc.update_event(event, event_id, [realm]_id=)`
 * `sc.update_[realm]_event(event, event_id, [realm]_id)`
 * `sc.delete_event(event_id, [realm]_id=)`
-* `sc.delete_[realm]_event(event_id, [realm_id])`
+* `sc.delete_[realm]_event(event_id, [realm]_id)`
 
 ## Author
 This library was created by [Erik Boesen](https://github.com/ErikBoesen).
