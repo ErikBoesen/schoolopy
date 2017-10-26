@@ -19,26 +19,6 @@ class Schoology:
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
 
-    def _oauth_header(self):
-            auth = 'OAuth realm="Schoology API",'
-            auth += 'oauth_consumer_key="%s",' % self.key
-            auth += 'oauth_token="%s",' % ('' if self.schoology_auth.access_token == None else self.schoology_auth.access_token)
-            auth += 'oauth_nonce="%s",' % ''.join([str(random.randint(0, 9)) for i in range(8)])
-            auth += 'oauth_timestamp="%d",' % time.time()
-            auth += 'oauth_signature_method="PLAINTEXT",'
-            auth += 'oauth_version="1.0",'
-            auth += 'oauth_signature="%s%%26%s"' % (self.secret, '' if self.schoology_auth.access_token_secret == None or self.schoology_auth.access_token_secret == '' else self.schoology_auth.access_token_secret)
-            return auth
-
-    def _request_header(self):
-        header = {
-            'Authorization': self._oauth_header(),
-            'Accept': 'application/json',
-            'Host': 'api.schoology.com',
-            'Content-Type': 'application/json'
-        }
-        return header
-
     def _get(self, path):
         """
         GET data from a given endpoint.
@@ -47,7 +27,9 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self._request_header()).json()
+            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            print(response)
+            return response.json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -60,7 +42,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -73,7 +55,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -83,7 +65,7 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        return self.schoology_auth.oauth.delete(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self._request_header())
+        return self.schoology_auth.oauth.delete(url='%s%s' % (self._ROOT, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
 
     def get_schools(self):
         """
@@ -1973,16 +1955,16 @@ class Schoology:
         """
         return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
-    def send_message(self, subject, message, user_ids):
+    def send_message(self, subject, content, user_ids):
         """
         Send a message to a user or users.
 
         :param subject: A string holding the subject of a message.
-        :param message: A string holding the body of a message.
+        :param content: A string holding the body of a message.
         :param user_ids: A list of user ids to send the message to.
         """
         recipients = ','.join([str(uid) for uid in user_ids])
-        return Message(self._post('messages', {'subject': subject, 'message': message, 'recipient_ids': recipients}))
+        return Message(self._post('messages', {'subject': subject, 'message': content, 'recipient_ids': recipients}))
 
     # Implement resource collections, resource templates
 
