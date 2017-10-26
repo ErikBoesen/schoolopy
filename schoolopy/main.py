@@ -10,20 +10,21 @@ class Schoology:
     key = ''
     secret = ''
 
-    def __init__(self, key, secret):
-        self.key = key
-        self.secret = secret
+    def __init__(self, schoology_auth):
+        self.key = schoology_auth.consumer_key
+        self.secret = schoology_auth.consumer_secret
+        self.schoology_auth = schoology_auth
 
     def _oauth_header(self):
-        auth = 'OAuth realm="Schoology API",'
-        auth += 'oauth_consumer_key="%s",' % self.key
-        auth += 'oauth_token="",'
-        auth += 'oauth_nonce="%s",' % ''.join([str(random.randint(0, 9)) for i in range(8)])
-        auth += 'oauth_timestamp="%d",' % time.time()
-        auth += 'oauth_signature_method="PLAINTEXT",'
-        auth += 'oauth_version="1.0",'
-        auth += 'oauth_signature="%s%%26"' % self.secret
-        return auth
+            auth = 'OAuth realm="Schoology API",'
+            auth += 'oauth_consumer_key="%s",' % self.key
+            auth += 'oauth_token="%s",' % ('' if self.schoology_auth.access_token == None else self.schoology_auth.access_token)
+            auth += 'oauth_nonce="%s",' % ''.join([str(random.randint(0, 9)) for i in range(8)])
+            auth += 'oauth_timestamp="%d",' % time.time()
+            auth += 'oauth_signature_method="PLAINTEXT",'
+            auth += 'oauth_version="1.0",'
+            auth += 'oauth_signature="%s%%26%s"' % (self.secret, '' if self.schoology_auth.access_token_secret == None or self.schoology_auth.access_token_secret == '' else self.schoology_auth.access_token_secret)
+            return auth
 
     def _request_header(self):
         header = {
@@ -42,7 +43,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.get(self._ROOT + path, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.get(url=self._ROOT + path, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -55,7 +56,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.post(self._ROOT + path, json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.post(url=self._ROOT + path, json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -68,7 +69,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.put(self._ROOT + path, json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.put(url=self._ROOT + path, json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -78,7 +79,7 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        requests.delete(self._ROOT + path, headers=self._request_header())
+        return self.schoology_auth.oauth.delete(url=self._ROOT + path, headers=self._request_header())
 
     def get_schools(self):
         """
@@ -151,7 +152,7 @@ class Schoology:
 
         :return: User object obtained from API. (Of yourself)
         """
-        return User(self.get_user(self.get_self_user_info().api_uid))
+        return User(self._get('users/me'))
 
     def get_users(self, inactive=False):
         """
