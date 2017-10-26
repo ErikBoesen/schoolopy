@@ -1,5 +1,6 @@
 from .models import *
 import requests
+from .authentication import AuthorizationError
 import time
 import random
 import json
@@ -12,6 +13,8 @@ class Schoology:
     limit = 20
 
     def __init__(self, schoology_auth):
+        if not schoology_auth.authorized:
+            raise AuthorizationError("SchoologyAuth instance not authorized. Run .authorize after requesting authorization.")
         self.key = schoology_auth.consumer_key
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
