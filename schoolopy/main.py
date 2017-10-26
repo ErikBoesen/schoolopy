@@ -9,6 +9,7 @@ class Schoology:
     _ROOT = 'https://api.schoology.com/v1/'
     key = ''
     secret = ''
+    limit = 20
 
     def __init__(self, schoology_auth):
         self.key = schoology_auth.consumer_key
@@ -43,7 +44,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.get(url=self._ROOT + path, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -56,7 +57,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.post(url=self._ROOT + path, json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -69,7 +70,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.put(url=self._ROOT + path, json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self._request_header()).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -79,7 +80,7 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        return self.schoology_auth.oauth.delete(url=self._ROOT + path, headers=self._request_header())
+        return self.schoology_auth.oauth.delete(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self._request_header())
 
     def get_schools(self):
         """
