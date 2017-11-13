@@ -5,10 +5,10 @@ class _base_model(dict):
         self.__dict__ = self
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, dict.__repr__(self.json()))
+        return '%s(%s)' % (self.__class__.__name__, self.json())
 
     def json(self):
-        return {k: self[k] for k in self}
+        return dict.__repr__(self)
 
 
 def _model(class_name):
