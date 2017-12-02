@@ -1,5 +1,6 @@
 from .models import *
 import requests
+from .authentication import AuthorizationError
 import time
 import random
 import json
@@ -11,29 +12,12 @@ class Schoology:
     secret = ''
     limit = 20
 
-    def __init__(self, key, secret):
-        self.key = key
-        self.secret = secret
-
-    def _oauth_header(self):
-        auth = 'OAuth realm="Schoology API",'
-        auth += 'oauth_consumer_key="%s",' % self.key
-        auth += 'oauth_token="",'
-        auth += 'oauth_nonce="%s",' % ''.join([str(random.randint(0, 9)) for i in range(8)])
-        auth += 'oauth_timestamp="%d",' % time.time()
-        auth += 'oauth_signature_method="PLAINTEXT",'
-        auth += 'oauth_version="1.0",'
-        auth += 'oauth_signature="%s%%26"' % self.secret
-        return auth
-
-    def _request_header(self):
-        header = {
-            'Authorization': self._oauth_header(),
-            'Accept': 'application/json',
-            'Host': 'api.schoology.com',
-            'Content-Type': 'application/json'
-        }
-        return header
+    def __init__(self, schoology_auth):
+        if not schoology_auth.authorized:
+            raise AuthorizationError("SchoologyAuth instance not authorized. Run .authorize after requesting authorization.")
+        self.key = schoology_auth.consumer_key
+        self.secret = schoology_auth.consumer_secret
+        self.schoology_auth = schoology_auth
 
     def _get(self, path):
         """
@@ -43,7 +27,9 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.get('%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self._request_header()).json()
+            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            print(response)
+            return response.json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -56,7 +42,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.post(self._ROOT + path, json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -69,7 +55,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return requests.put(self._ROOT + path, json=data, headers=self._request_header()).json()
+            return self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
         except json.decoder.JSONDecodeError:
             return {}
 
@@ -79,7 +65,7 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        requests.delete(self._ROOT + path, headers=self._request_header())
+        return self.schoology_auth.oauth.delete(url='%s%s' % (self._ROOT, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
 
     def get_schools(self):
         """
@@ -148,11 +134,11 @@ class Schoology:
 
     def get_me(self):
         """
-        Get data of the client using this method (Yourself)
+        Get data of the client using this method (Yourself).
 
         :return: User object obtained from API. (Of yourself)
         """
-        return User(self.get_user(self.get_self_user_info()['api_uid']))
+        return User(self._get('users/me'))
 
     def get_users(self, inactive=False):
         """
@@ -167,7 +153,8 @@ class Schoology:
         """
         Get data on a user.
 
-        :param user_id: ID of user on whom to get data.
+        :param user_id: ID of user to get data from.
+        :param inactive: Gets inactive users instead of normal ones.
         :return: User object.
         """
         return User(self._get(('users/' + ('inactive/' if inactive else '') + '%s') % user_id))
@@ -186,7 +173,7 @@ class Schoology:
         """
         Bulk create users.
 
-        :param users: A list of users
+        :param users: A list of User objects.
         :return: User objects obtained from API.
         """
         return [User(raw) for raw in self._post('users', {'users': {'user': [user.json() for user in users]}})]
@@ -205,7 +192,7 @@ class Schoology:
         """
         Bulk update users.
 
-        :param users: A list of users
+        :param users: A list of users.
         :return: User objects obtained from API.
         """
         return [User(raw) for raw in self._put('users', {'users': {'user': [user.json() for user in users]}})]
@@ -1968,24 +1955,24 @@ class Schoology:
         """
         return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
-    def send_message(self, subject, message, user_ids):
+    def send_message(self, subject, content, user_ids):
         """
         Send a message to a user or users.
 
         :param subject: A string holding the subject of a message.
-        :param message: A string holding the body of a message.
+        :param content: A string holding the body of a message.
         :param user_ids: A list of user ids to send the message to.
         """
         recipients = ','.join([str(uid) for uid in user_ids])
-        return Message(self._post('messages', {'subject': subject, 'message': message.json(), 'recipient_ids': recipients}))
+        return Message(self._post('messages', {'subject': subject, 'message': content, 'recipient_ids': recipients}))
 
     # Implement resource collections, resource templates
 
     def _like(self, path):
         """
-        Post a like request
+        Post a like request.
 
-        :param path: The path with values to POST to
+        :param path: The path with values to POST to.
         :return: Number of likes on the object.
         """
         try:
@@ -1995,15 +1982,15 @@ class Schoology:
 
     def _unlike(self, path):
         """
-        Post an unlike request
+        Post an unlike request.
 
-        :param path: The path with values to POST to
-        :return: Number of likes on the object
+        :param path: The path with values to POST to.
+        :return: Number of likes on the object.
         """
         try:
             return self._post(path, {'like_action': False})['likes']
         except TypeError:
-            raise NoDifferenceError('You are already not liking this post.')
+            raise NoDifferenceError('You have already unliked this post.')
 
     def like(self, id):
         """
@@ -2061,17 +2048,20 @@ class Schoology:
         """
         return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
 
-    def get_user_actions(self, user_id, start=0, end=time.time()):
+    def get_user_actions(self, user_id, start=None, end=int(time.time())):
         """
         Get analysis of a user's actions over a given period of time.
 
         This endpoint is typically only available to site admins.
 
         :param user_id: ID of user to get actions of.
-        :param start: Timestamp at which to start action list.
+        :param start: Timestamp at which to start action list. Defaults to 7 days before end.
         :param end: Timestamp at which to end action list.
         """
-        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%d&end_time=%d' % (user_id, start, end))['actions']]
+        start = end-604800 if start == None else start
+        if start < end-604800:
+            raise AttributeError('Start timestamp must be no earlier than 7 days before end timestamp.')
+        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s' % (user_id, start, end))['actions']]
 
     # TODO: Implement other analytics endpoints
     # TODO: Implement multi-get(!) and multi-options requests. Don't seem to work right now.
@@ -2083,8 +2073,8 @@ class Schoology:
         Get the items for a search of keywords and type.
 
         :param keywords: The keywords you wish to search with.
-        :param type: The type of search (user, group, course)
-        :return: A list of dictionaries representing search outputs
+        :param type: The type of search (user, group, course).
+        :return: A list of dictionaries representing search outputs.
         """
         return self._get('search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
 
@@ -2093,7 +2083,7 @@ class Schoology:
         Get the items for a search of keywords in users.
 
         :param keywords: The keywords you wish to search with.
-        :return: A list of dictionaries representing search outputs
+        :return: A list of dictionaries representing search outputs.
         """
         return self._search(keywords, 'user')
 
@@ -2102,7 +2092,7 @@ class Schoology:
         Get the items for a search of keywords in groups.
 
         :param keywords: The keywords you wish to search with.
-        :return: A list of dictionaries representing search outputs
+        :return: A list of dictionaries representing search outputs.
         """
         return self._search(keywords, 'group')
 
@@ -2111,6 +2101,6 @@ class Schoology:
         Get the items for a search of keywords in courses.
 
         :param keywords: The keywords you wish to search with.
-        :return: A list of dictionaries representing search outputs
+        :return: A list of dictionaries representing search outputs.
         """
         return self._search(keywords, 'course')
