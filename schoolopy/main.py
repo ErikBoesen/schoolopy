@@ -14,7 +14,7 @@ class Schoology:
 
     def __init__(self, schoology_auth):
         if not schoology_auth.authorized:
-            raise AuthorizationError("SchoologyAuth instance not authorized. Run .authorize after requesting authorization.")
+            raise AuthorizationError('Auth instance not authorized. Run .authorize after requesting authorization.')
         self.key = schoology_auth.consumer_key
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
@@ -28,7 +28,6 @@ class Schoology:
         """
         try:
             response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
-            print(response)
             return response.json()
         except json.decoder.JSONDecodeError:
             return {}

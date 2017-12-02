@@ -9,7 +9,7 @@ with open('example_config.yml', 'r') as f:
 # Make sure to replace 'https://www.schoology.com' with your school's domain.
 DOMAIN = 'https://www.schoology.com'
 
-auth = schoolopy.SchoologyAuth(cfg['key'], cfg['secret'], three_legged=True, domain=DOMAIN)
+auth = schoolopy.Auth(cfg['key'], cfg['secret'], three_legged=True, domain=DOMAIN)
 # Request authorization URL to open in another window.
 url = auth.request_authorization()
 
@@ -20,13 +20,13 @@ if url is not None:
 # Wait for user to accept or deny the request.
 input('Press enter when ready.')
 
-# Authorize the SchoologyAuth instance as the user has either accepted or not accepted the request.
+# Authorize the Auth instance as the user has either accepted or not accepted the request.
 # Returns False if failed.
 
 if not auth.authorize():
     raise SystemExit('Account was not authorized.')
 
-# Create a Schoology instance with SchoologyAuth as a parameter.
+# Create a Schoology instance with Auth as a parameter.
 sc = schoolopy.Schoology(auth)
 sc.limit = 10  # Only retrieve 10 objects max
 

@@ -4,12 +4,7 @@ import yaml
 with open('example_config.yml', 'r') as f:
     cfg = yaml.load(f)
 
-# Instantiate with 'three_legged' set to True for three_legged oauth.
-# Make sure to replace 'https://www.schoology.com' with your school's domain.
-DOMAIN = 'https://www.schoology.com'
-
-auth = schoolopy.SchoologyAuth(cfg['key'], cfg['secret'])
-sc = schoolopy.Schoology(auth)
+sc = schoolopy.Schoology(schoolopy.Auth(cfg['key'], cfg['secret']))
 sc.limit = 10  # Only retrieve 10 objects max
 
 print('Your name is %s' % sc.get_me().name_display)
