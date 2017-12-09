@@ -1,7 +1,14 @@
 schoolopy
 =========
 
-Python wrapper for Schoology’s API.
+    Python wrapper for Schoology’s API.
+
+.. image:: https://badge.fury.io/py/schoolopy.svg
+    :target: https://badge.fury.io/py/schoolopy
+
+Installation
+------------
+You may easily install ``schoolopy`` from PyPI with ``pip3 install schoolopy``.
 
 Setup & Authorization
 ---------------------
