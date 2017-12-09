@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='schoolopy',
-      version='0.1.0',
+      version='0.2.0',
       description='A Python wrapper for Schoology\'s API.',
       url='https://github.com/ErikBoesen/schoolopy',
       author='Erik Boesen',
