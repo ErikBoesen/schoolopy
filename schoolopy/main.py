@@ -1,8 +1,6 @@
 from .models import *
-import requests
 from .authentication import AuthorizationError
 import time
-import random
 import json
 
 
@@ -14,7 +12,7 @@ class Schoology:
 
     def __init__(self, schoology_auth):
         if not schoology_auth.authorized:
-            raise AuthorizationError('Auth instance not authorized. Run .authorize after requesting authorization.')
+            raise AuthorizationError('Auth instance not authorized. Run authorize() after requesting authorization.')
         self.key = schoology_auth.consumer_key
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
@@ -1829,7 +1827,7 @@ class Schoology:
 
     def get_grading_group(self, group_id, section_id):
         """
-        Get agrading group in a course section.
+        Get a grading group in a course section.
 
         :param group_id: ID of group.
         :param section_id: ID of group's section.
@@ -1848,7 +1846,7 @@ class Schoology:
 
     def create_grading_groups(self, groups, section_id):
         """
-        Update multiple grading groups.
+        Create multiple grading groups.
 
         :param groups: List of GradingGroup objects to create.
         :param section_id: ID of section in which to create groups.
@@ -1954,18 +1952,28 @@ class Schoology:
         """
         return [Message(raw) for raw in self._get('messages/inbox/%s' % message_id)['message']]
 
+
+    def create_message(self, message):
+        """
+        Create a new message.
+
+        :param message: Message object to create.
+        """
+        if isinstance(message.recipient_ids, list):
+            message.recipient_ids = ','.join(message.recipient_ids)
+        return Message(self._post('messages', message.json()))
+
     def send_message(self, subject, content, user_ids):
         """
-        Send a message to a user or users.
+        Helper function for sending messages.
 
         :param subject: A string holding the subject of a message.
         :param content: A string holding the body of a message.
-        :param user_ids: A list of user ids to send the message to.
+        :param user_ids: A list of IDs of users to which to send the message.
         """
-        recipients = ','.join([str(uid) for uid in user_ids])
-        return Message(self._post('messages', {'subject': subject, 'message': content, 'recipient_ids': recipients}))
+        return self.create_message(Message({'subject': subject, 'message': content, 'recipient_ids': user_ids}))
 
-    # Implement resource collections, resource templates
+    # TODO: Implement resource collections, resource templates
 
     def _like(self, path):
         """
@@ -2057,8 +2065,8 @@ class Schoology:
         :param start: Timestamp at which to start action list. Defaults to 7 days before end.
         :param end: Timestamp at which to end action list.
         """
-        start = end-604800 if start == None else start
-        if start < end-604800:
+        start = end - 604800 if start is None else start
+        if start < end - 604800:
             raise AttributeError('Start timestamp must be no earlier than 7 days before end timestamp.')
         return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s' % (user_id, start, end))['actions']]
 
