@@ -156,15 +156,14 @@ class Schoology:
         """
         return User(self._get(('users/' + ('inactive/' if inactive else '') + '%s') % user_id))
 
-    def create_user(self, user, user_id):
+    def create_user(self, user):
         """
         Create a new user.
 
         :param user: User object containing necessary fields.
-        :param user_id: ID of user you wish to create.
         :return: User object obtained from API.
         """
-        return User(self._post('users/%s' % user_id, user))
+        return User(self._post('users', user))
 
     def create_users(self, users):
         """
