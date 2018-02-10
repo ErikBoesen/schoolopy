@@ -45,6 +45,7 @@ Association = _model('Association')
 Session = _model('Session')
 MessageThread = _model('MessageThread')
 Message = _model('Message')
+Action = _model('Action')
 
 class NoDifferenceError(Exception):
     """
