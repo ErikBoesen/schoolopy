@@ -9,6 +9,7 @@ class Schoology:
     key = ''
     secret = ''
     limit = 20
+    start = 0
 
     def __init__(self, schoology_auth):
         if not schoology_auth.authorized:
@@ -2054,20 +2055,21 @@ class Schoology:
         """
         return self._post('poll/%s/vote' % poll_id, {'id': choice_id, 'select': True})
 
-    def get_user_actions(self, user_id, start=None, end=int(time.time())):
+    def get_user_actions(self, user_id, start_time=None, end_time=int(time.time())):
         """
         Get analysis of a user's actions over a given period of time.
 
         This endpoint is typically only available to site admins.
 
         :param user_id: ID of user to get actions of.
-        :param start: Timestamp at which to start action list. Defaults to 7 days before end.
-        :param end: Timestamp at which to end action list.
+        :param start_time: Timestamp at which to start action list. Defaults to 7 days before end.
+        :param end_time: Timestamp at which to end action list.
+        :return: List of Actions the user has completed.
         """
-        start = end - 604800 if start is None else start
-        if start < end - 604800:
+        start_time = end_time - 604800 if start_time is None else start_time
+        if start_time < end_time - 604800:
             raise AttributeError('Start timestamp must be no earlier than 7 days before end timestamp.')
-        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s' % (user_id, start, end))['actions']]
+        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s&start=%s&limit=%s' % (user_id, start_time, end_time, self.start, self.limit))['actions']]
 
     # TODO: Implement other analytics endpoints
     # TODO: Implement multi-get(!) and multi-options requests. Don't seem to work right now.
