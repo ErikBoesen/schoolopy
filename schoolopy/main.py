@@ -3,6 +3,11 @@ from .authentication import AuthorizationError
 import time
 import json
 
+try:
+    from json.decoder import JSONDecodeError
+except ImportError:
+    JSONDecodeError = ValueError
+
 
 class Schoology:
     _ROOT = 'https://api.schoology.com/v1/'
@@ -28,7 +33,7 @@ class Schoology:
         try:
             response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
             return response.json()
-        except json.decoder.JSONDecodeError:
+        except JSONDecodeError:
             return {}
 
     def _post(self, path, data):
@@ -41,7 +46,7 @@ class Schoology:
         """
         try:
             return self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
-        except json.decoder.JSONDecodeError:
+        except JSONDecodeError:
             return {}
 
     def _put(self, path, data):
@@ -54,7 +59,7 @@ class Schoology:
         """
         try:
             return self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
-        except json.decoder.JSONDecodeError:
+        except JSONDecodeError:
             return {}
 
     def _delete(self, path):
