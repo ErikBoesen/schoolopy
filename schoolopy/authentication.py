@@ -3,7 +3,12 @@ import time
 import requests_oauthlib
 from requests_oauthlib.oauth1_session import TokenRequestDenied
 from oauthlib.common import urldecode
-from urllib import parse
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+
 
 
 class AuthorizationError(Exception):
@@ -69,7 +74,7 @@ class Auth:
             self.request_token_secret = fetch_response.get('oauth_token_secret')
 
         base_authorization_url = self.DOMAIN_ROOT + '/oauth/authorize'
-        return self.oauth.authorization_url(base_authorization_url, request_token=self.request_token) + '&' + parse.urlencode({'oauth_callback': self.DOMAIN_ROOT})
+        return self.oauth.authorization_url(base_authorization_url, request_token=self.request_token) + '&' + urlencode({'oauth_callback': self.DOMAIN_ROOT})
 
     def authorize(self):
         if self.authorized or not self.three_legged:
