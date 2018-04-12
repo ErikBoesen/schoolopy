@@ -23,15 +23,19 @@ class Schoology:
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
 
-    def _get(self, path):
+    def _get(self, path, query=None):
         """
         GET data from a given endpoint.
 
         :param path: Path (following API root) to endpoint.
         :return: JSON response.
         """
+        earl = url='%s%s?limit=%s%s' % (self._ROOT, path, self.limit, query)
         try:
-            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response = self.schoology_auth.oauth.get(
+                url=earl, headers=self.schoology_auth._request_header(),
+                auth=self.schoology_auth.oauth.auth
+            )
             return response.json()
         except JSONDecodeError:
             return {}
@@ -1867,7 +1871,6 @@ class Schoology:
         """
         self._delete('sections/%s/grading_groups/%s' % (section_id, group_id))
 
-
     def get_assignments(self, section_id):
         return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id)['assignment']]
 
@@ -1881,7 +1884,6 @@ class Schoology:
     def get_assignment_comment(self, section_id, assignment_id, comment_id):
         return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id)))
 
-
     # TODO: Support Grades
     # TODO: Support Attendance
     # TODO: Support Submissions
@@ -1891,15 +1893,44 @@ class Schoology:
     # TODO: Support Web Content Package
     # TODO: Support Completion
 
+    def get_section_grades(self, section_id, query_name=None, query_value=None):
+        """
+        Returns a list of grades (paged).
+
+        :param section_id: ID of course's section.
+        :return: a list of grades for that section.
+
+        The following optional query strings can be appended to the path
+        to filter results:
+
+        :param query_name (timestamp, assignment_id, or enrollment_id)
+        :param query_value
+
+        timestamp:      return only grades that have been changed since
+                        the given timestamp, according to the server time.
+                        e.g. "timestamp": 1517551200
+        assignment_id:  filter grades for a given assignment
+        enrollment_id:  filter grades for a given enrollment
+        """
+
+        query = ''
+        if query_name and query_value:
+            query = '&{}={}'.format(query_name, query_value)
+
+        return [
+            Grade(raw) for raw in self._get(
+                'sections/{}/grades'.format(section_id), query
+            )['grades']['grade']
+        ]
+
     def get_friend_requests(self, user_id):
         return [FriendRequest(raw) for raw in self._get('users/%s/requests/friends' % user_id)['request']]
 
     def get_friend_request(self, user_id, request_id):
         return FriendRequest(self._get('users/%s/requests/friends/%s' % (user_id, request_id)))
 
-
     def get_user_section_invites(self, user_id):
-        return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)['invite']]
+        return [Invite(raw) for raw in self._get('users/{}/invites/sections'.format(user_id))['invite']]
 
     def get_user_group_invites(self, user_id):
         return [Invite(raw) for raw in self._get('users/%s/invites/groups' % user_id)['invite']]
@@ -1910,14 +1941,8 @@ class Schoology:
     def get_user_group_invite(self, user_id, invite_id):
         return Invite(self._get('users/%s/invites/groups/%s' % (user_id, invite_id)))
 
-
     def get_user_network(self, user_id):
         return [User(raw) for raw in self._get('users/%s/network' % user_id)['users']]
-
-
-    def get_user_grades(self, user_id):
-        return [Grade(raw) for raw in self._get('users/%s/grades' % user_id)['section']]
-
 
     def get_user_sections(self, user_id):
         return [Section(raw) for raw in self._get('users/%s/sections' % user_id)['section']]
