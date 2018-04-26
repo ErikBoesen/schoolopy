@@ -1893,33 +1893,23 @@ class Schoology:
     # TODO: Support Web Content Package
     # TODO: Support Completion
 
-    def get_section_grades(self, section_id, query_name=None, query_value=None):
+    def get_section_grades(self, section_id, query=None):
         """
         Returns a list of grades (paged).
 
         :param section_id: ID of course's section.
-        :return: a list of grades for that section.
-
-        The following optional query strings can be appended to the path
-        to filter results:
-
-        :param query_name (timestamp, assignment_id, or enrollment_id)
-        :param query_value
-
-        timestamp:      return only grades that have been changed since
-                        the given timestamp, according to the server time.
-                        e.g. "timestamp": 1517551200
-        assignment_id:  filter grades for a given assignment
-        enrollment_id:  filter grades for a given enrollment
+        :param query: name/value pairs in HTTP GET form.
+        :return: a list of grades.
         """
 
-        query = ''
-        if query_name and query_value:
-            query = '&{}={}'.format(query_name, query_value)
+        if query and isinstance(query ,dict):
+            get = ''
+            for key, value in query.items():
+                get += '&{}={}'.format(key, value)
 
         return [
             Grade(raw) for raw in self._get(
-                'sections/{}/grades'.format(section_id), query
+                'sections/{}/grades'.format(section_id), get
             )['grades']['grade']
         ]
 
@@ -1930,7 +1920,7 @@ class Schoology:
         return FriendRequest(self._get('users/%s/requests/friends/%s' % (user_id, request_id)))
 
     def get_user_section_invites(self, user_id):
-        return [Invite(raw) for raw in self._get('users/{}/invites/sections'.format(user_id))['invite']]
+        return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)['invite']]
 
     def get_user_group_invites(self, user_id):
         return [Invite(raw) for raw in self._get('users/%s/invites/groups' % user_id)['invite']]
