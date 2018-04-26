@@ -1910,6 +1910,30 @@ class Schoology:
         return [
             Grade(raw) for raw in self._get(
                 'sections/{}/grades'.format(section_id), get
+
+        :return: a list of grades for that section.
+
+        The following optional query strings can be appended to the path
+        to filter results:
+
+        :param query_name (timestamp, assignment_id, or enrollment_id)
+        :param query_value
+
+        timestamp:      return only grades that have been changed since
+                        the given timestamp, according to the server time.
+                        e.g. "timestamp": 1517551200
+        assignment_id:  filter grades for a given assignment
+        enrollment_id:  filter grades for a given enrollment
+        """
+
+        query = ''
+        if query_name and query_value:
+            query = '&{}={}'.format(query_name, query_value)
+
+        return [
+            Grade(raw) for raw in self._get(
+                'sections/{}/grades'.format(section_id), query
+>>>>>>> 4559d1c4c74a71ce7f993ee560f50872b4657fc9
             )['grades']['grade']
         ]
 
@@ -1920,7 +1944,7 @@ class Schoology:
         return FriendRequest(self._get('users/%s/requests/friends/%s' % (user_id, request_id)))
 
     def get_user_section_invites(self, user_id):
-        return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)['invite']]
+        return [Invite(raw) for raw in self._get('users/{}/invites/sections'.format(user_id))['invite']]
 
     def get_user_group_invites(self, user_id):
         return [Invite(raw) for raw in self._get('users/%s/invites/groups' % user_id)['invite']]
