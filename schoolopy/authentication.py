@@ -38,15 +38,15 @@ class Auth:
         self.three_legged = three_legged
 
     def _oauth_header(self):
-            auth  = 'OAuth realm="Schoology API",'
-            auth += 'oauth_consumer_key="%s",' % self.consumer_key
-            auth += 'oauth_token="%s",' % ('' if self.access_token is None else self.access_token)
-            auth += 'oauth_nonce="%s",' % ''.join([str(random.randint(0, 9)) for i in range(8)])
-            auth += 'oauth_timestamp="%d",' % time.time()
-            auth += 'oauth_signature_method="PLAINTEXT",'
-            auth += 'oauth_version="1.0",'
-            auth += 'oauth_signature="%s%%26%s"' % (self.consumer_secret, self.access_token_secret if self.access_token_secret else '')
-            return auth
+        auth  = 'OAuth realm="Schoology API",'
+        auth += 'oauth_consumer_key="%s",' % self.consumer_key
+        auth += 'oauth_token="%s",' % ('' if self.access_token is None else self.access_token)
+        auth += 'oauth_nonce="%s",' % ''.join([str(random.randint(0, 9)) for i in range(8)])
+        auth += 'oauth_timestamp="%d",' % time.time()
+        auth += 'oauth_signature_method="PLAINTEXT",'
+        auth += 'oauth_version="1.0",'
+        auth += 'oauth_signature="%s%%26%s"' % (self.consumer_secret, self.access_token_secret if self.access_token_secret else '')
+        return auth
 
     def _request_header(self):
         return {
