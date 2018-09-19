@@ -4,6 +4,15 @@ import requests_oauthlib
 from requests_oauthlib.oauth1_session import TokenRequestDenied
 from oauthlib.common import urldecode
 
+"""
+Suppress InsecureRequestWarning
+https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho
+"""
+#from requests.packages.urllib3.exceptions import InsecureRequestWarning
+#requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 try:
     from urllib.parse import urlencode
 except ImportError:
