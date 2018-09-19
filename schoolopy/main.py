@@ -23,19 +23,20 @@ class Schoology:
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
 
-    def _get(self, path, query=None):
+    def _get(self, path, query=''):
         """
         GET data from a given endpoint.
 
         :param path: Path (following API root) to endpoint.
         :return: JSON response.
         """
-        earl = url='%s%s?limit=%s%s' % (self._ROOT, path, self.limit, query)
+        url = '%s%s?limit=%s%s' % (self._ROOT, path, self.limit, query)
         try:
             response = self.schoology_auth.oauth.get(
-                url=earl, headers=self.schoology_auth._request_header(),
+                url=url, headers=self.schoology_auth._request_header(),
                 auth=self.schoology_auth.oauth.auth
             )
+            #print(response.__dict__)
             return response.json()
         except JSONDecodeError:
             return {}
@@ -304,6 +305,8 @@ class Schoology:
             return self.get_section_enrollments(section_id)
         elif group_id:
             return self.get_group_enrollments(group_id)
+        elif course_id:
+            return self.get_course_enrollments(course_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -312,6 +315,9 @@ class Schoology:
 
     def get_group_enrollments(self, group_id):
         return [Enrollment(raw) for raw in self._get('groups/%s/enrollments' % group_id)['enrollment']]
+
+    def get_course_enrollments(self, course_id):
+        return [Enrollment(raw) for raw in self._get('course/%s/enrollments' % course_id)['enrollment']]
 
 
     # TODO: Do we need to provide the ID of the realm?
@@ -1918,6 +1924,14 @@ class Schoology:
 
     def get_friend_request(self, user_id, request_id):
         return FriendRequest(self._get('users/%s/requests/friends/%s' % (user_id, request_id)))
+
+    def get_user_grades(self, section_id):
+
+        return [
+            Grade(raw) for raw in self._get(
+                'users/{}/grades'.format(section_id)
+            )['grades']['grade']
+        ]
 
     def get_user_section_invites(self, user_id):
         return [Invite(raw) for raw in self._get('users/%s/invites/sections' % user_id)['invite']]
