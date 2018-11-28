@@ -31,7 +31,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s&start=%s' % (self._ROOT, path, self.limit, self.start), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
             return response.json()
         except JSONDecodeError:
             return {}
