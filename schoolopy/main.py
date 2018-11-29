@@ -1978,6 +1978,17 @@ class Schoology:
         """
         return self.create_message(Message({'subject': subject, 'message': content, 'recipient_ids': user_ids}))
 
+    def delete_message(self, message_id):
+        """
+        Delete a message.
+
+        Note: both the sent/ and inbox/ endpoints can be used for this operation with the same result.
+        :param message_id: ID of the message thread for deletion.
+        """
+        self._delete('messages/inbox/%s' % message_id)
+
+    # TODO: Support replying to messages
+
     # TODO: Implement resource collections, resource templates
 
     def _like(self, path):
