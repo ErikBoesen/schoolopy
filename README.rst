@@ -15,19 +15,19 @@ Setup & Authorization
 
 Before any use of ``schoolopy``, you'll need to import it.
 
-.. code:: py
+.. code:: python
     import schoolopy
 
 You'll then need to instantiate the ``Auth`` class and, using that object, instantiate the API wrapper. There are two ways of authenticating with Schoology: two-legged and three-legged. The former is far simpler and useful for apps used by only one user who is capable of managing their own API keys, but if you're building a web app to interact with Schoology you'll need to use three-legged.
 
 Obtain your consumer API key and secret from ``[Schoology URL]/api``.
 
-.. code:: py
+.. code:: python
     # Two-legged
     sc = schoolopy.Schoology(schoolopy.Auth(key, secret))
     sc.get_feed()  # etc.
 
-.. code:: py
+.. code:: python
     # Three-legged
     auth = schoolopy.Auth(key, secret, three_legged=True, domain='https://schoology.com')  # Replace URL with that of your school's Schoology
     url = auth.request_authorization()
