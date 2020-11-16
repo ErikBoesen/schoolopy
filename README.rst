@@ -65,6 +65,8 @@ Most objects’ functions follow a similar pattern to the following example.
 -  ``sc.delete_event(event_id, [realm]_id=)``
 -  ``sc.delete_[realm]_event(event_id, [realm]_id)``
 
+**Note: Some methods, such as `get_courses`, are currently broken because Schoology's API has stopped providing data on the relevant endpoints.**
+
 Author
 ------
 
