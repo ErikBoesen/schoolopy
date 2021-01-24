@@ -1329,15 +1329,15 @@ class Schoology:
         return Update(self._post('groups/%s/updates' % group_id, comment.json()))
 
 
-    def get_update_comments(self, comment, update_id, user_id=None, section_id=None, group_id=None):
+    def get_update_comments(self, update_id, user_id=None, section_id=None, group_id=None):
         """
-        Helper function for creating a comment on an update in any realm.
+        Get data on update comments in any realm.
 
         :param update_id: ID of update from which to get comments.
         :param *_id: ID of realm.
         """
         if user_id:
-            return self.get_user_update_comments(update_id, district_id)
+            return self.get_user_update_comments(update_id, user_id)
         elif section_id:
             return self.get_section_update_comments(update_id, section_id)
         elif group_id:
@@ -1364,7 +1364,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            return self.get_user_update_comment(comment_id, update_id, district_id)
+            return self.get_user_update_comment(comment_id, update_id, user_id)
         elif section_id:
             return self.get_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
