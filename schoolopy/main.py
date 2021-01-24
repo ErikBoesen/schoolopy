@@ -2060,6 +2060,16 @@ class Schoology:
         """
         return self._unlike('like/%s/comment/%s' % (id, comment_id))
 
+    def get_comment_likes(self, id, comment_id):
+        """
+        Get all users who have liked a comment on an object.
+
+        :param id: ID of object on which the comment was written.
+        :param comment_id: ID of comment to check likes of.
+        :return List of users who have liked the comment.
+        """
+        return [User(raw) for raw in self._get('like/%s/comment/%s' % (id, comment_id))['users']]
+    
     def vote(self, poll_id, choice_id):
         """
         Cast a vote on a poll.
