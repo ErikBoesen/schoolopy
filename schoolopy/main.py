@@ -1328,6 +1328,7 @@ class Schoology:
     def create_group_update(self, comment, update_id, group_id):
         return Update(self._post('groups/%s/updates/%s/comments' % (group_id, update_id), comment.json()))
 
+
     def get_update_comments(self, update_id, user_id=None, section_id=None, group_id=None):
         """
         Get data on update comments in any realm.
