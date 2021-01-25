@@ -1197,9 +1197,9 @@ class Schoology:
         if user_id:
             self.get_user_updates(user_id)
         elif section_id:
-            self.get_user_updates(section_id)
+            self.get_section_updates(section_id)
         elif group_id:
-            self.get_user_updates(group_id)
+            self.get_group_updates(group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -1284,7 +1284,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            return self.update_district_update(update, district_id)
+            return self.update_user_update(update, district_id)
         elif section_id:
             return self.update_section_update(update, section_id)
         elif group_id:
@@ -1292,13 +1292,13 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def update_district_update(update, district_id):
-        return Update(self._put('districts/%s/updates' % district_id, update.json()))
+    def update_user_update(self, update, user_id):
+        return Update(self._put('users/%s/updates' % user_id, update.json()))
 
-    def update_section_update(update, section_id):
+    def update_section_update(self, update, section_id):
         return Update(self._put('sections/%s/updates' % section_id, update.json()))
 
-    def update_group_update(update, group_id):
+    def update_group_update(self, update, group_id):
         return Update(self._put('groups/%s/updates' % group_id, update.json()))
 
 
@@ -1311,7 +1311,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            return self.create_user_update_comment(comment, update_id, district_id)
+            return self.create_user_update_comment(comment, update_id, user_id)
         elif section_id:
             return self.create_section_update_comment(comment, update_id, section_id)
         elif group_id:
@@ -1319,15 +1319,14 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def create_district_update(update, district_id):
-        return Update(self._post('districts/%s/updates' % district_id, comment.json()))
+    def create_user_update_comment(self, comment, update_id, user_id):
+        return Update(self._post('users/%s/updates/%s/comments' % (user_id, update_id), comment.json()))
 
-    def create_section_update(update, section_id):
-        return Update(self._post('sections/%s/updates' % section_id, comment.json()))
+    def create_section_update_comment(self, comment, update_id, section_id):
+        return Update(self._post('sections/%s/updates/%s/comments' % (section_id, update_id), comment.json()))
 
-    def create_group_update(update, group_id):
-        return Update(self._post('groups/%s/updates' % group_id, comment.json()))
-
+    def create_group_update(self, comment, update_id, group_id):
+        return Update(self._post('groups/%s/updates/%s/comments' % (group_id, update_id), comment.json()))
 
     def get_update_comments(self, update_id, user_id=None, section_id=None, group_id=None):
         """
@@ -1391,7 +1390,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            self.delete_user_update_comment(comment_id, update_id, district_id)
+            self.delete_user_update_comment(comment_id, update_id, user_id)
         elif section_id:
             self.delete_section_update_comment(comment_id, update_id, section_id)
         elif group_id:
