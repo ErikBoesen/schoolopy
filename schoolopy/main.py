@@ -1170,7 +1170,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            self.create_district_update(update, district_id)
+            self.create_user_update(update, user_id)
         elif section_id:
             self.create_school_update(update, school_id)
         elif group_id:
@@ -1178,13 +1178,13 @@ class Schoology:
         else:
             raise TypeError('Realm id property required.')
 
-    def create_district_update(update, district_id):
-        return Update(self._post('districts/%s/updates' % district_id, update.json()))
+    def create_user_update(self, update, user_id):
+        return Update(self._post('users/%s/updates' % user_id, update.json()))
 
-    def create_section_update(update, section_id):
+    def create_section_update(self, update, section_id):
         return Update(self._post('sections/%s/updates' % section_id, update.json()))
 
-    def create_group_update(update, group_id):
+    def create_group_update(self, update, group_id):
         return Update(self._post('groups/%s/updates' % group_id, update.json()))
 
 
@@ -1232,7 +1232,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            self.get_user_update(update_id, district_id)
+            self.get_user_update(update_id, user_id)
         elif section_id:
             self.get_section_update(update_id, section_id)
         elif group_id:
@@ -1258,7 +1258,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            self.delete_user_update(update_id, district_id)
+            self.delete_user_update(update_id, user_id)
         elif section_id:
             self.delete_section_update(update_id, section_id)
         elif group_id:
@@ -1284,7 +1284,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if user_id:
-            return self.update_user_update(update, district_id)
+            return self.update_user_update(update, user_id)
         elif section_id:
             return self.update_section_update(update, section_id)
         elif group_id:
@@ -1383,10 +1383,10 @@ class Schoology:
 
     def delete_update_comment(self, comment_id, update_id, user_id=None, section_id=None, group_id=None):
         """
-        Get data on an update comment in any realm.
+        Delete an update comment in any realm.
 
-        :param comment_id: ID of comment on which to get data.
-        :param update_id: ID of update on which to create comment.
+        :param comment_id: ID of comment to delete.
+        :param update_id: ID of update on which to delete comment.
         :param *_id: ID of realm.
         """
         if user_id:
