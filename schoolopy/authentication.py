@@ -56,7 +56,9 @@ class Auth:
             'Content-Type': 'application/json'
         }
 
-    def request_authorization(self):
+    def request_authorization(self, callback_url=None):
+        if callback_url == None:
+            callback_url = self.DOMAIN_ROOT
         if self.authorized:
             if not self.three_legged:
                 return None
@@ -74,7 +76,7 @@ class Auth:
             self.request_token_secret = fetch_response.get('oauth_token_secret')
 
         base_authorization_url = self.DOMAIN_ROOT + '/oauth/authorize'
-        return self.oauth.authorization_url(base_authorization_url, request_token=self.request_token) + '&' + urlencode({'oauth_callback': self.DOMAIN_ROOT})
+        return self.oauth.authorization_url(base_authorization_url, request_token=self.request_token) + '&' + urlencode({'oauth_callback': callback_url})
 
     def authorize(self):
         if self.authorized or not self.three_legged:
