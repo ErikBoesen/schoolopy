@@ -1,4 +1,4 @@
-from schoolopy.errors import NoDifferenceError
+from .errors import NoDifferenceError
 from .models import *
 from .authentication import AuthorizationError
 import time
