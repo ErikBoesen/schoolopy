@@ -1,3 +1,4 @@
+from schoolopy.errors import NoDifferenceError
 from .models import *
 from .authentication import AuthorizationError
 import time
@@ -31,7 +32,8 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s&start=%s' % (self._ROOT, path, self.limit, self.start), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response.raise_for_status()
             return response.json()
         except JSONDecodeError:
             return {}
@@ -45,8 +47,10 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
-        except JSONDecodeError:
+            response = self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response.raise_for_status()
+            return response.json()
+        except json.decoder.JSONDecodeError:
             return {}
 
     def _put(self, path, data):
@@ -58,8 +62,10 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            return self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth).json()
-        except JSONDecodeError:
+            response = self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response.raise_for_status()
+            return response.json()
+        except json.decoder.JSONDecodeError:
             return {}
 
     def _delete(self, path):
@@ -249,13 +255,13 @@ class Schoology:
         """
         return Course(self._get('courses/%s' % course_id))
 
-    def get_sections(self):
+    def get_sections(self, course_id):
         """
         Get data on all sections.
 
         :return: List of Section objects.
         """
-        return [Section(raw) for raw in self._get('sections')['section']]
+        return [Section(raw) for raw in self._get('courses/%s/sections' % course_id)['section']]
 
     def get_section(self, section_id):
         """
@@ -357,10 +363,10 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def update_section_enrollment(self, enrollment, section_id):
-        return update_section_enrollments(section_id, [enrollment])
+        return self.update_section_enrollments(section_id, [enrollment])
 
     def update_group_enrollment(self, enrollment, group_id):
-        return update_group_enrollments(group_id, [enrollment])
+        return self.update_group_enrollments(group_id, [enrollment])
 
     def update_section_enrollments(self, enrollments, section_id):
         return [Enrollment(raw) for raw in self._put('sections/%s/enrollments' % section_id, {'enrollments': {'enrollment': [enrollment.json() for enrollment in enrollments]}})]
@@ -392,7 +398,7 @@ class Schoology:
 
 
     def delete_enrollments(self, enrollment_ids):
-        self._delete('enrollments?enrollment_ids=' + ','.join(enr))
+        self._delete('enrollments?enrollment_ids=' + ','.join(enrollment_ids))
 
     # Course enrollments imports not implemented, similar effect can be obtained through extant methods
 
@@ -658,15 +664,15 @@ class Schoology:
         :return: List of BlogPost objects recieved from API.
         """
         if district_id:
-            return self.get_district_blog_posts(post_id, district_id)
+            return self.get_district_blog_post(post_id, district_id)
         elif school_id:
-            return self.get_school_blog_posts(post_id, school_id)
+            return self.get_school_blog_post(post_id, school_id)
         elif user_id:
-            return self.get_user_blog_posts(post_id, user_id)
+            return self.get_user_blog_post(post_id, user_id)
         elif section_id:
-            return self.get_section_blog_posts(post_id, section_id)
+            return self.get_section_blog_post(post_id, section_id)
         elif group_id:
-            return self.get_group_blog_posts(post_id, group_id)
+            return self.get_group_blog_post(post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -766,15 +772,15 @@ class Schoology:
         :return: BlogPostComment object recieved from API.
         """
         if district_id:
-            return self.create_district_blog_post(comment, post_id, district_id)
+            return self.create_district_blog_post_comment(comment, post_id, district_id)
         elif school_id:
-            return self.create_school_blog_post(comment, post_id, school_id)
+            return self.create_district_blog_post_comment(comment, post_id, school_id)
         elif user_id:
-            return self.create_user_blog_post(comment, post_id, user_id)
+            return self.create_district_blog_post_comment(comment, post_id, user_id)
         elif section_id:
-            return self.create_section_blog_post(comment, post_id, section_id)
+            return self.create_district_blog_post_comment(comment, post_id, section_id)
         elif group_id:
-            return self.create_group_blog_post(comment, post_id, group_id)
+            return self.create_district_blog_post_comment(comment, post_id, group_id)
         else:
             raise TypeError('Realm id property required.')
 
@@ -956,16 +962,16 @@ class Schoology:
             raise TypeError('Realm id property required.')
 
     def create_district_discussion(self, discussion, district_id):
-        return Discussion(self._post('districts/%s/discussions/%s' % (district_id, discussion_id), discussion.json()))
+        return Discussion(self._post('districts/%s/discussions/%s' % (district_id, discussion.id), discussion.json()))
 
     def create_school_discussion(self, discussion, school_id):
-        return Discussion(self._post('schools/%s/discussions/%s' % (school_id, discussion_id), discussion.json()))
+        return Discussion(self._post('schools/%s/discussions/%s' % (school_id, discussion.id), discussion.json()))
 
     def create_section_discussion(self, discussion, section_id):
-        return Discussion(self._post('sections/%s/discussions/%s' % (section_id, discussion_id), discussion.json()))
+        return Discussion(self._post('sections/%s/discussions/%s' % (section_id, discussion.id), discussion.json()))
 
     def create_group_discussion(self, discussion, group_id):
-        return Discussion(self._post('groups/%s/discussions/%s' % (group_id, discussion_id), discussion.json()))
+        return Discussion(self._post('groups/%s/discussions/%s' % (group_id, discussion.id), discussion.json()))
 
 
     def get_discussion(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
@@ -1000,7 +1006,7 @@ class Schoology:
         return Discussion(self._get('groups/%s/discussions/%s' % (group_id, discussion_id)))
 
 
-    def delete_discussion(self, comment_id, post_id, district_id=None, school_id=None, section_id=None, group_id=None):
+    def delete_discussion(self, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
         """
         Delete discussions in any realm.
 
@@ -1096,7 +1102,7 @@ class Schoology:
         return [DiscussionReply(raw) for raw in self._get('groups/%s/discussions/%s/comments' % (group_id, discussion_id))['comment']]
 
 
-    def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, section_id=None, group_id=None):
+    def get_discussion_reply(self, reply_id, discussion_id, district_id=None, school_id=None, user_id=None, section_id=None, group_id=None):
         """
         Get individual discussion replies in any realm.
 
@@ -1122,6 +1128,9 @@ class Schoology:
 
     def get_school_discussion_reply(self, reply_id, discussion_id, school_id):
         return DiscussionReply(self._get('schools/%s/discussions/%s/comments/%s' % (school_id, discussion_id, reply_id)))
+
+    def get_user_discussion_reply(self, reply_id, discussion_id, user_id):
+        return DiscussionReply(self._get('schools/%s/discussions/%s/comments/%s' % (user_id, discussion_id, reply_id)))
 
     def get_section_discussion_reply(self, reply_id, discussion_id, section_id):
         return DiscussionReply(self._get('sections/%s/discussions/%s/comments/%s' % (section_id, discussion_id, reply_id)))
@@ -1172,7 +1181,7 @@ class Schoology:
         if user_id:
             self.create_user_update(update, user_id)
         elif section_id:
-            self.create_school_update(update, school_id)
+            self.create_section_update(update, section_id)
         elif group_id:
             self.create_group_update(update, group_id)
         else:
@@ -1325,7 +1334,7 @@ class Schoology:
     def create_section_update_comment(self, comment, update_id, section_id):
         return Update(self._post('sections/%s/updates/%s/comments' % (section_id, update_id), comment.json()))
 
-    def create_group_update(self, comment, update_id, group_id):
+    def create_group_update_comment(self, comment, update_id, group_id):
         return Update(self._post('groups/%s/updates/%s/comments' % (group_id, update_id), comment.json()))
 
 
@@ -1419,7 +1428,7 @@ class Schoology:
         :param *_id: ID of realm.
         """
         if section_id:
-            return self.create_section_media_album(album, section)
+            return self.create_section_media_album(album, section_id)
         elif group_id:
             return self.create_group_media_album(album, group_id)
         else:
@@ -1440,7 +1449,7 @@ class Schoology:
         :return: List of MediaAlbum objects.
         """
         if section_id:
-            return self.get_school_media_albums(section_id)
+            return self.get_section_media_albums(section_id)
         elif group_id:
             return self.get_group_media_albums(group_id)
         else:
@@ -1474,9 +1483,9 @@ class Schoology:
         return MediaAlbum(self._get('groups/%s/albums/%s' % (group_id, album_id)))
 
 
-    def update_media_album(self, album, section_id=None, group_id=None):
+    def update_media_album(self, album_id, section_id=None, group_id=None):
         """
-        Helper function for updating amedia album in any realm.
+        Helper function for updating a media album in any realm.
 
         :param *_id: ID of realm.
         :return: MediaAlbum object.
@@ -1495,9 +1504,9 @@ class Schoology:
         return MediaAlbum(self._get('groups/%s/albums/%s' % (group_id, album_id)))
 
 
-    def delete_media_album(self, album, section_id=None, group_id=None):
+    def delete_media_album(self, album_id, section_id=None, group_id=None):
         """
-        Delete amedia album in any realm.
+        Delete a media album in any realm.
 
         :param *_id: ID of realm.
         :return: MediaAlbum object.
@@ -1629,8 +1638,8 @@ class Schoology:
         :param document: Document object to post to API.
         :param *_id: ID of realm.
         """
-        if school_id:
-            return self.create_section_media_album(document, school_id)
+        if group_id:
+            return self.create_section_media_album(document, group_id)
         if section_id:
             return self.create_section_media_album(document, section_id)
         else:
@@ -1639,8 +1648,6 @@ class Schoology:
     def create_school_media_album(self, document, school_id):
         return Document(self._post('schools/%s/documents' % school_id, document.json()))
 
-    def create_section_media_album(self, document, section_id):
-        return Document(self._post('sections/%s/documents' % section_id, document.json()))
 
 
     def get_documents(self, section_id=None, group_id=None):
@@ -1650,18 +1657,18 @@ class Schoology:
         :param document: Document object to post to API.
         :param *_id: ID of realm.
         """
-        if school_id:
-            return self.get_school_documents(school_id)
+        if group_id:
+            return self.get_school_documents(group_id)
         if section_id:
             return self.get_section_documents(section_id)
         else:
             raise TypeError('Realm id property required.')
 
     def get_school_documents(self, school_id):
-        return [Document(raw) for raw in self._post('schools/%s/documents' % school_id)['document']]
+        return [Document(raw) for raw in self._get('schools/%s/documents' % school_id)['document']]
 
     def get_section_documents(self, section_id):
-        return [Document(raw) for raw in self._post('sections/%s/documents' % section_id)['document']]
+        return [Document(raw) for raw in self._get('sections/%s/documents' % section_id)['document']]
 
 
     def get_document(self, document_id, section_id=None, group_id=None):
@@ -1671,18 +1678,18 @@ class Schoology:
         :param document: Document object to post to API.
         :param *_id: ID of realm.
         """
-        if school_id:
-            return self.get_school_document(document_id, school_id)
+        if group_id:
+            return self.get_school_document(document_id, group_id)
         if section_id:
             return self.get_section_document(document_id, section_id)
         else:
             raise TypeError('Realm id property required.')
 
     def get_school_document(self, document_id, school_id):
-        return Document(self._post('schools/%s/documents/%s' % (school_id, document_id)))
+        return Document(self._get('schools/%s/documents/%s' % (school_id, document_id)))
 
     def get_section_document(self, document_id, section_id):
-        return Document(self._post('sections/%s/documents/%s' % (section_id, document_id)))
+        return Document(self._get('sections/%s/documents/%s' % (section_id, document_id)))
 
 
     def update_document(self, document, document_id, section_id=None, group_id=None):
@@ -1692,8 +1699,8 @@ class Schoology:
         :param document: Document object to post to API.
         :param *_id: ID of realm.
         """
-        if school_id:
-            self.update_school_document(document, document_id, school_id)
+        if group_id:
+            self.update_school_document(document, document_id, group_id)
         if section_id:
             self.update_section_document(document, document_id, section_id)
         else:
@@ -1713,18 +1720,18 @@ class Schoology:
         :param document_id: ID of document to delete.
         :param *_id: ID of realm.
         """
-        if school_id:
-            self.delete_school_document(document_id, school_id)
+        if group_id:
+            self.delete_school_document(document_id, group_id)
         if section_id:
             self.delete_section_document(document_id, section_id)
         else:
             raise TypeError('Realm id property required.')
 
     def delete_school_document(self, document_id, school_id):
-        self._put('schools/%s/documents/%s' % (school_id, document_id))
+        self._delete('schools/%s/documents/%s' % (school_id, document_id))
 
     def delete_section_document(self, document_id, section_id):
-        self._put('sections/%s/documents/%s' % (section_id, document_id))
+        self._delete('sections/%s/documents/%s' % (section_id, document_id))
 
 
     def get_grading_scale(self, section_id):
@@ -1794,15 +1801,6 @@ class Schoology:
         """
         return self.create_grading_categories([category], section_id)[0]
 
-    def create_grading_categories(self, categories, section_id):
-        """
-        Update multiple grading categories.
-
-        :param categories: List of GradingCategory objects to create.
-        :param section_id: ID of section in which to create categories.
-        """
-        return [GradingCategory(raw) for raw in self._post('sections/%s/grading_categories' % section_id, {'grading_categories': {'grading_category': [category.json() for category in categories]}})['grading_category']]
-
     def delete_grading_category(self, category_id, section_id):
         """
         Delete agrading category in a course section.
@@ -1811,7 +1809,6 @@ class Schoology:
         :param section_id: ID of category's section.
         """
         self._delete('sections/%s/grading_categories/%s' % (section_id, category_id))
-
 
     def create_grading_groups(self, groups, section_id):
         """
@@ -1848,15 +1845,6 @@ class Schoology:
         :return: GradingGroup object recieved from API.
         """
         return self.create_grading_groups([group], section_id)[0]
-
-    def create_grading_groups(self, groups, section_id):
-        """
-        Create multiple grading groups.
-
-        :param groups: List of GradingGroup objects to create.
-        :param section_id: ID of section in which to create groups.
-        """
-        return [GradingGroup(raw) for raw in self._post('sections/%s/grading_groups' % section_id, {'grading_groups': {'grading_group': [group.json() for group in groups]}})['grading_group']]
 
     def delete_grading_group(self, group_id, section_id):
         """
