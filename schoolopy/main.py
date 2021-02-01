@@ -16,7 +16,7 @@ class Schoology:
     limit = 20
     start = 0
 
-    def __init__(self, schoology_auth, api_host='https://api.schoology.com/v1'):
+    def __init__(self, schoology_auth, api_host='https://api.schoology.com/v1/'):
         if not schoology_auth.authorized:
             raise AuthorizationError('Auth instance not authorized. Run authorize() after requesting authorization.')
         self.key = schoology_auth.consumer_key
