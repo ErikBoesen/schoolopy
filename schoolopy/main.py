@@ -11,18 +11,18 @@ except ImportError:
 
 
 class Schoology:
-    _ROOT = 'https://api.schoology.com/v1/'
     key = ''
     secret = ''
     limit = 20
     start = 0
 
-    def __init__(self, schoology_auth):
+    def __init__(self, schoology_auth, api_server='https://api.schoology.com/v1'):
         if not schoology_auth.authorized:
             raise AuthorizationError('Auth instance not authorized. Run authorize() after requesting authorization.')
         self.key = schoology_auth.consumer_key
         self.secret = schoology_auth.consumer_secret
         self.schoology_auth = schoology_auth
+        self.api_server = api_server + '/'
 
     def _get(self, path):
         """
@@ -32,7 +32,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self.api_server, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
             response.raise_for_status()
             return response.json()
         except JSONDecodeError:
@@ -47,7 +47,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            response = self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response = self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self.api_server, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
             response.raise_for_status()
             return response.json()
         except json.decoder.JSONDecodeError:
@@ -62,7 +62,7 @@ class Schoology:
         :return: JSON response.
         """
         try:
-            response = self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self._ROOT, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+            response = self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self.api_server, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
             response.raise_for_status()
             return response.json()
         except json.decoder.JSONDecodeError:
@@ -74,7 +74,7 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        return self.schoology_auth.oauth.delete(url='%s%s' % (self._ROOT, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        return self.schoology_auth.oauth.delete(url='%s%s' % (self.api_server, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
 
     def get_schools(self):
         """
