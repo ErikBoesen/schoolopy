@@ -1,5 +1,5 @@
 from typing_extensions import Literal
-from .errors import NoDifferenceError
+from .errors import NoDataError, NoDifferenceError
 from .models import *
 from .authentication import AuthorizationError
 import time
@@ -32,12 +32,12 @@ class Schoology:
         :param path: Path (following API root) to endpoint.
         :return: JSON response.
         """
+        response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self.api_host, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response.raise_for_status()
         try:
-            response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self.api_host, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
-            response.raise_for_status()
             return response.json()
         except JSONDecodeError:
-            return {}
+            raise NoDataError(f'Get request to {response.url} failed with response {response.text}')
 
     def _post(self, path, data):
         """
@@ -47,12 +47,12 @@ class Schoology:
         :param data: JSON data to POST.
         :return: JSON response.
         """
+        response = self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self.api_host, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response.raise_for_status()
         try:
-            response = self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self.api_host, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
-            response.raise_for_status()
             return response.json()
         except json.decoder.JSONDecodeError:
-            return {}
+            raise NoDataError(f'Post request to {response.url} failed with response {response.text}')
 
     def _put(self, path, data):
         """
@@ -62,12 +62,12 @@ class Schoology:
         :param data: JSON data to PUT.
         :return: JSON response.
         """
+        response = self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self.api_host, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response.raise_for_status()
         try:
-            response = self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self.api_host, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
-            response.raise_for_status()
             return response.json()
         except json.decoder.JSONDecodeError:
-            return {}
+            raise NoDataError(f'Put request to {response.url} failed with response {response.text}')
 
     def _delete(self, path):
         """
@@ -75,7 +75,9 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        return self.schoology_auth.oauth.delete(url='%s%s' % (self.api_host, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response = self.schoology_auth.oauth.delete(url='%s%s' % (self.api_host, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response.raise_for_status()
+        return response
 
     def get_schools(self):
         """

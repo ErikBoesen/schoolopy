@@ -4,3 +4,11 @@ class NoDifferenceError(Exception):
     and makes it easier to tell what went wrong.
     """
     pass
+
+
+class NoDataError(Exception):
+    """
+    This exception represents a case where Schoology returns no data or invalid JSON
+    from a standard API endpoint.
+    """
+    pass
