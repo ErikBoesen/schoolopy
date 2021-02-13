@@ -1,3 +1,4 @@
+from typing_extensions import Literal
 from .errors import NoDifferenceError
 from .models import *
 from .authentication import AuthorizationError
@@ -1925,8 +1926,11 @@ class Schoology:
     def get_role(self, role_id):
         return Role(self._get('roles/%s' % role_id))
 
-    def get_messages(self):
-        return [MessageThread(raw) for raw in self._get('messages')['message']]
+    def get_messages(self, message_folder: Literal['sent', 'inbox']):
+        if message_folder == 'sent':
+            return self.get_sent_messages()
+        else:
+            return self.get_inbox_messages()
 
     def get_sent_messages(self):
         return [MessageThread(raw) for raw in self._get('messages/sent')['message']]
