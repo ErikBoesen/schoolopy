@@ -36,7 +36,7 @@ class Schoology:
         try:
             return response.json()
         except JSONDecodeError:
-            raise NoDataError(f'Get request to {response.url} failed with response {response.text}')
+            raise NoDataError(f'Get request to {response.url} failed: {response.text}')
 
     def _post(self, path, data):
         """
@@ -51,7 +51,7 @@ class Schoology:
         try:
             return response.json()
         except json.decoder.JSONDecodeError:
-            raise NoDataError(f'Post request to {response.url} failed with response {response.text}')
+            raise NoDataError(f'Post request to {response.url} failed: {response.text}')
 
     def _put(self, path, data):
         """
@@ -66,7 +66,7 @@ class Schoology:
         try:
             return response.json()
         except json.decoder.JSONDecodeError:
-            raise NoDataError(f'Put request to {response.url} failed with response {response.text}')
+            raise NoDataError(f'Put request to {response.url} failed: {response.text}')
 
     def _delete(self, path):
         """
