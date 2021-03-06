@@ -257,13 +257,18 @@ class Schoology:
         """
         return Course(self._get('courses/%s' % course_id))
 
-    def get_sections(self, course_id):
+    def get_sections(self, course_id=None, user_id=None):
         """
         Get data on all sections.
 
+        :param *_id: ID of realm.
         :return: List of Section objects.
         """
-        return [Section(raw) for raw in self._get('courses/%s/sections' % course_id)['section']]
+        if course_id:
+            sections_url = 'courses/%s/sections' % course_id
+        elif user_id:
+            sections_url = 'users/%s/sections' % user_id
+        return [Section(raw) for raw in self._get(sections_url)['section']]
 
     def get_section(self, section_id):
         """
