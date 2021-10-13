@@ -1907,8 +1907,10 @@ class Schoology:
 
     def get_user_grades(self, user_id):
         return [Grade(raw) for raw in self._get('users/%s/grades' % user_id)['section']]
-
-
+    
+    def get_user_grades_by_section(self, user_id, section_id):
+        return [Grade(raw) for raw in self._get('users/%s/grades?section_id=%s' % (user_id, section_id))['section']]
+    
     def get_user_sections(self, user_id):
         return [Section(raw) for raw in self._get('users/%s/sections' % user_id)['section']]
 
