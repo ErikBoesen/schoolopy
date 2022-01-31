@@ -31,7 +31,11 @@ class Schoology:
         :param path: Path (following API root) to endpoint.
         :return: JSON response.
         """
-        response = self.schoology_auth.oauth.get(url='%s%s?limit=%s' % (self.api_host, path, self.limit), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response = self.schoology_auth.oauth.get(
+            url='%s%s&limit=%s' % (self.api_host, path, self.limit) if '?' in path else '%s%s?limit=%s' % (self.api_host, path, self.limit),
+            headers=self.schoology_auth._request_header(), 
+            auth=self.schoology_auth.oauth.auth
+        )
         response.raise_for_status()
         try:
             return response.json()
