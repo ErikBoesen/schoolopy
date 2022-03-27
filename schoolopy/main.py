@@ -33,7 +33,7 @@ class Schoology:
         """
         response = self.schoology_auth.oauth.get(
             url='%s%s&limit=%s' % (self.api_host, path, self.limit) if '?' in path else '%s%s?limit=%s' % (self.api_host, path, self.limit),
-            headers=self.schoology_auth._request_header(), 
+            headers=self.schoology_auth._request_header(),
             auth=self.schoology_auth.oauth.auth
         )
         response.raise_for_status()
@@ -261,13 +261,26 @@ class Schoology:
         """
         return Course(self._get('courses/%s' % course_id))
 
-    def get_sections(self, course_id):
+    def get_course_sections(self, course_id=None):
         """
-        Get data on all sections.
+        Get data on all sections of a given course.
 
         :return: List of Section objects.
         """
         return [Section(raw) for raw in self._get('courses/%s/sections' % course_id)['section']]
+
+    def get_sections(self, course_id=None):
+        """
+        Get data on all sections in which a user is enrolled.
+        If course_id is passed, the call will be passed through to get_course_sections,
+        which performs the original purpose of this method.
+
+        :return: List of Section objects.
+        """
+        # For backwards-compatibility
+        if course_id is not None:
+            return self.get_course_sections(course_id)
+        return [Section(raw) for raw in self._get('sections')['section']]
 
     def get_section(self, section_id):
         """
@@ -277,7 +290,6 @@ class Schoology:
         :return: Section object.
         """
         return Section(self._get('sections/%s' % section_id))
-
 
     def create_enrollment(self, enrollment, section_id=None, group_id=None):
         """
@@ -1911,10 +1923,10 @@ class Schoology:
 
     def get_user_grades(self, user_id):
         return [Grade(raw) for raw in self._get('users/%s/grades' % user_id)['section']]
-    
+
     def get_user_grades_by_section(self, user_id, section_id):
         return [Grade(raw) for raw in self._get('users/%s/grades?section_id=%s' % (user_id, section_id))['section']]
-    
+
     def get_user_sections(self, user_id):
         return [Section(raw) for raw in self._get('users/%s/sections' % user_id)['section']]
 
@@ -2073,7 +2085,7 @@ class Schoology:
         :return List of users who have liked the comment.
         """
         return [User(raw) for raw in self._get('like/%s/comment/%s' % (id, comment_id))['users']]
-    
+
     def vote(self, poll_id, choice_id):
         """
         Cast a vote on a poll.
