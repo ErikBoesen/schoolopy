@@ -24,15 +24,29 @@ class Schoology:
         self.schoology_auth = schoology_auth
         self.api_host = api_host
 
-    def _get(self, path):
+    def _get_params_string(self, params):
+        """
+        Take a dictionary of parameters and convert it into a parameter string.
+
+        :params: Dictionary of parameter names and values.
+        :return: String representing encoded URL parameters.
+        """
+        params.update({
+            'limit': self.limit,
+        })
+        string = '&'.join([f'{key}={value}' for key, value in params.items()])
+        return '?' + string
+
+    def _get(self, path, params={}):
         """
         GET data from a given endpoint.
 
         :param path: Path (following API root) to endpoint.
+        :param params: Custom URL parameters to add.
         :return: JSON response.
         """
         response = self.schoology_auth.oauth.get(
-            url='%s%s&limit=%s' % (self.api_host, path, self.limit) if '?' in path else '%s%s?limit=%s' % (self.api_host, path, self.limit),
+            url=self.api_host + path + self._get_params_string(params),
             headers=self.schoology_auth._request_header(),
             auth=self.schoology_auth.oauth.auth
         )
@@ -42,7 +56,7 @@ class Schoology:
         except JSONDecodeError:
             raise NoDataError(f'Get request to {response.url} failed: {response.text}')
 
-    def _post(self, path, data):
+    def _post(self, path, data, params={}):
         """
         POST valid JSON to a given endpoint.
 
@@ -50,14 +64,19 @@ class Schoology:
         :param data: JSON data to POST.
         :return: JSON response.
         """
-        response = self.schoology_auth.oauth.post(url='%s%s?limit=%s' % (self.api_host, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response = self.schoology_auth.oauth.post(
+            url=self.api_host + path + self._get_params_string(params),
+            json=data,
+            headers=self.schoology_auth._request_header(),
+            auth=self.schoology_auth.oauth.auth
+        )
         response.raise_for_status()
         try:
             return response.json()
         except json.decoder.JSONDecodeError:
             raise NoDataError(f'Post request to {response.url} failed: {response.text}')
 
-    def _put(self, path, data):
+    def _put(self, path, data, params={}):
         """
         PUT valid JSON to a given endpoint.
 
@@ -65,7 +84,12 @@ class Schoology:
         :param data: JSON data to PUT.
         :return: JSON response.
         """
-        response = self.schoology_auth.oauth.put(url='%s%s?limit=%s' % (self.api_host, path, self.limit), json=data, headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response = self.schoology_auth.oauth.put(
+            url=self.api_host + path + self._get_params_string(params),
+            json=data,
+            headers=self.schoology_auth._request_header(),
+            auth=self.schoology_auth.oauth.auth
+        )
         response.raise_for_status()
         try:
             return response.json()
@@ -78,7 +102,11 @@ class Schoology:
 
         :param path: Path (following API root) to endpoint.
         """
-        response = self.schoology_auth.oauth.delete(url='%s%s' % (self.api_host, path), headers=self.schoology_auth._request_header(), auth=self.schoology_auth.oauth.auth)
+        response = self.schoology_auth.oauth.delete(
+            url=self.api_host + path,
+            headers=self.schoology_auth._request_header(),
+            auth=self.schoology_auth.oauth.auth
+        )
         response.raise_for_status()
         return response
 
@@ -261,7 +289,7 @@ class Schoology:
         """
         return Course(self._get('courses/%s' % course_id))
 
-    def get_course_sections(self, course_id=None):
+    def get_course_sections(self, course_id=None, include_past=False):
         """
         Get data on all sections of a given course.
 
@@ -416,7 +444,7 @@ class Schoology:
 
 
     def delete_enrollments(self, enrollment_ids):
-        self._delete('enrollments?enrollment_ids=' + ','.join(enrollment_ids))
+        self._delete('enrollments', params={'enrollment_ids': ','.join(enrollment_ids)})
 
     # Course enrollments imports not implemented, similar effect can be obtained through extant methods
 
@@ -1925,7 +1953,7 @@ class Schoology:
         return [Grade(raw) for raw in self._get('users/%s/grades' % user_id)['section']]
 
     def get_user_grades_by_section(self, user_id, section_id):
-        return [Grade(raw) for raw in self._get('users/%s/grades?section_id=%s' % (user_id, section_id))['section']]
+        return [Grade(raw) for raw in self._get('users/%s/grades' % user_id, params={'section_id': section_id})['section']]
 
     def get_user_sections(self, user_id):
         return [Section(raw) for raw in self._get('users/%s/sections' % user_id)['section']]
@@ -2111,7 +2139,12 @@ class Schoology:
         start_time = end_time - 604800 if start_time is None else start_time
         if start_time < end_time - 604800:
             raise AttributeError('Start timestamp must be no earlier than 7 days before end timestamp.')
-        return [Action(raw) for raw in self._get('analytics/users/%s?start_time=%s&end_time=%s&start=%s&limit=%s' % (user_id, start_time, end_time, self.start, self.limit))['actions']]
+        return [Action(raw) for raw in self._get('analytics/users/%s' % user_id,
+                                                 params={
+                                                     'start_time': start_time,
+                                                     'end_time': end_time,
+                                                     'start': self.start
+                                                 })['actions']]
 
     # TODO: Implement other analytics endpoints
     # TODO: Implement multi-get(!) and multi-options requests. Don't seem to work right now.
@@ -2126,7 +2159,7 @@ class Schoology:
         :param type: The type of search (user, group, course).
         :return: A list of dictionaries representing search outputs.
         """
-        return self._get('search?keywords=%s&type=%s' % ('+'.join(keywords), search_type))[search_type+'s']['search_result']
+        return self._get('search', {'keywords': '+'.join(keywords), 'type': search_type})[search_type + 's']['search_result']
 
     def search_users(self, keywords):
         """
