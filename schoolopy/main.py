@@ -1967,6 +1967,9 @@ class Schoology:
 
     # TODO: Implement get_grading_periods and get_grading_period
 
+    def get_grading_periods(self):
+        return [GradingPeriod(raw) for raw in self._get('gradingperiods')['gradingperiods']]
+
     def get_roles(self):
         return [Role(raw) for raw in self._get('roles')['role']]
 
