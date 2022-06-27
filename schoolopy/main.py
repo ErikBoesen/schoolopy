@@ -1970,6 +1970,9 @@ class Schoology:
     def get_grading_periods(self):
         return [GradingPeriod(raw) for raw in self._get('gradingperiods')['gradingperiods']]
 
+    def get_grading_period(self, gradingperiod_id):
+        return GradingPeriod(self._get('gradingperiods/%s' % gradingperiod_id))
+
     def get_roles(self):
         return [Role(raw) for raw in self._get('roles')['role']]
 
