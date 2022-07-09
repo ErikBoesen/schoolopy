@@ -1901,6 +1901,8 @@ class Schoology:
         """
         self._delete('sections/%s/grading_groups/%s' % (section_id, group_id))
 
+    def create_assignment(self, assignment, section_id):
+        return Assignment(self._post('/sections/%s/assignments' % section_id, assignment.json()))
 
     def get_assignments(self, section_id):
         return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id)['assignment']]
@@ -1965,7 +1967,11 @@ class Schoology:
     # TODO: Implement get_user_invites
     # TODO: Implement get_user_external_id
 
-    # TODO: Implement get_grading_periods and get_grading_period
+    def get_grading_periods(self):
+        return [GradingPeriod(raw) for raw in self._get('gradingperiods')['gradingperiods']]
+
+    def get_grading_period(self, gradingperiod_id):
+        return GradingPeriod(self._get('gradingperiods/%s' % gradingperiod_id))
 
     def get_roles(self):
         return [Role(raw) for raw in self._get('roles')['role']]
