@@ -312,7 +312,7 @@ class Schoology:
         :param section_id: ID of section on which to get data.
         :return: Section object.
         """
-        return self._get(f"sections/{section_id}")
+        return Section(self._get(f"sections/{section_id}"))
 
     def create_enrollment(self, enrollment, section_id=None, group_id=None):
         """
