@@ -300,12 +300,9 @@ class Schoology:
     def get_sections(self):
         """
         Get data on all sections in which a user is enrolled.
-        If course_id is passed, the call will be passed through to get_course_sections,
-        which performs the original purpose of this method.
 
         :return: List of Section objects.
         """
-        # For backwards-compatibility
         return [Section(raw) for raw in self._get(f"users/{self.get_me()['uid']}/sections")['section']]
 
     def get_section(self, section_id):
