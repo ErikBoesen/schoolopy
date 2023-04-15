@@ -297,13 +297,15 @@ class Schoology:
         """
         return [Section(raw) for raw in self._get('courses/%s/sections' % course_id)['section']]
 
-    def get_sections(self, uid=None):
+    def get_sections(self, user_id=None):
         """
         Get data on all sections in which a user is enrolled.
 
         :return: List of Section objects.
         """
-        return [Section(raw) for raw in self._get(f"users/{uid or self.get_me()['uid']}/sections")['section']]
+        if user_id is not None:
+            return self.get_user_sections(user_id)
+        return self.get_user_sections(self.get_me()['uid'])
 
     def get_section(self, section_id):
         """
@@ -312,7 +314,7 @@ class Schoology:
         :param section_id: ID of section on which to get data.
         :return: Section object.
         """
-        return Section(self._get(f"sections/{section_id}"))
+        return Section(self._get(f'sections/{section_id}'))
 
     def create_enrollment(self, enrollment, section_id=None, group_id=None):
         """
