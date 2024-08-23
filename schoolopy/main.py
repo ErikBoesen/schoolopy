@@ -32,6 +32,7 @@ class Schoology:
         :return: String representing encoded URL parameters.
         """
         params.update({
+            'start': self.start,
             'limit': self.limit,
         })
         string = '&'.join([f'{key}={value}' for key, value in params.items()])
