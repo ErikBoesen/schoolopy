@@ -32,6 +32,7 @@ class Schoology:
         :return: String representing encoded URL parameters.
         """
         params.update({
+            'start': self.start,
             'limit': self.limit,
         })
         string = '&'.join([f'{key}={value}' for key, value in params.items()])
@@ -153,7 +154,7 @@ class Schoology:
         :param school_id: ID of school whose buildings to get.
         :return: List of building objects in that school.
         """
-        return [Building(raw) for raw in self._get('schools/%s/buildings' % school_id)]
+        return [Building(raw) for raw in self._get('schools/%s/buildings' % school_id)['building']]
 
     # There is currently no endpoint for getting data on individual buildings.
     # This is due in part to the oft-blurred line Schoology draws between schools and buildings.
