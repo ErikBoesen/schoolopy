@@ -1903,7 +1903,7 @@ class Schoology:
         return Assignment(self._post('/sections/%s/assignments' % section_id, assignment.json()))
 
     def get_assignments(self, section_id, with_attachments: bool = True):
-        return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id, )['assignment']]
+        return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id, {"with_attachments": int(with_attachments)})['assignment']]
 
     def get_assignment(self, section_id, assignment_id):
         return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id)))
@@ -1922,7 +1922,7 @@ class Schoology:
     # TODO: Support Course Content Folders
     # TODO: Support Pages
 
-    def get_pages(self, section_id, with_content=True, with_attachments=True):
+    def get_pages(self, section_id, with_content: bool = True, with_attachments:bool = True):
         return [Page(raw) for raw in self._get('sections/%s/pages' % (section_id), {"withcontent": int(with_content), "with_attachments": int(with_attachments)})['page']]
 
     # TODO: Support SCORM Packages
