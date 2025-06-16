@@ -1921,6 +1921,10 @@ class Schoology:
     # TODO: Support Submissions
     # TODO: Support Course Content Folders
     # TODO: Support Pages
+
+    def get_pages(self, section_id, with_content: True, with_attachments: True):
+        return [Page(raw) for raw in self._get('sections/%s/pages' % (section_id), '?withcontent=%s&with_attachments=%s' % (int(with_content), int(with_attachments)))]
+
     # TODO: Support SCORM Packages
     # TODO: Support Web Content Package
     # TODO: Support Completion
