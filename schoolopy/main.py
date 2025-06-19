@@ -1905,8 +1905,27 @@ class Schoology:
     def get_assignments(self, section_id, with_attachments: bool = True):
         return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id, {"with_attachments": int(with_attachments)})['assignment']]
 
-    def get_assignment(self, section_id, assignment_id):
-        return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id)))
+    def get_file(self, url):
+        """
+        Get a file from the Schoology API.
+
+        :param url: URL of the file to retrieve.
+        :return: Response containing the file data in binary format.
+        """
+        response = self.schoology_auth.oauth.get(
+            url=url,
+            #headers=self.schoology_auth._request_header(),
+            #auth=self.schoology_auth.oauth.auth
+        )
+        response.raise_for_status()
+        try:
+            return response
+        except JSONDecodeError:
+            raise NoDataError(f'Get request to {response.url} failed: {response.text}')
+
+
+    def get_assignment(self, section_id, assignment_id, with_attachments: bool = True):
+        return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id), {"with_attachments": int(with_attachments)}))
 
 
     def get_assignment_comments(self, section_id, assignment_id):
@@ -1920,6 +1939,10 @@ class Schoology:
     # TODO: Support Attendance
     # TODO: Support Submissions
     # TODO: Support Course Content Folders
+
+    def get_section_folder(self, section_id, folder_id):
+        return CourseFolder(self._get('courses/%s/folder/%s' % (section_id, folder_id)))
+
     # TODO: Support Pages
 
     def get_pages(self, section_id, with_content: bool = True, with_attachments:bool = True):
