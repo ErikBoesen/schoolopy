@@ -1948,6 +1948,9 @@ class Schoology:
     def get_pages(self, section_id, with_content: bool = True, with_attachments:bool = True):
         return [Page(raw) for raw in self._get('sections/%s/pages' % (section_id), {"withcontent": int(with_content), "with_attachments": int(with_attachments)})['page']]
 
+    def get_section_page(self, page_id, section_id, with_attachments:bool = True):
+        return Page(self._get('sections/%s/page/%s' % (section_id, page_id), {"with_attachments": int(with_attachments)}))
+
     # TODO: Support SCORM Packages
     # TODO: Support Web Content Package
     # TODO: Support Completion
