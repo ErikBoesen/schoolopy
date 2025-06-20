@@ -1938,6 +1938,14 @@ class Schoology:
     # TODO: Support Grades
     # TODO: Support Attendance
     # TODO: Support Submissions
+
+    def get_assignment_submissions(self, section_id, assignment_id, with_attachments:bool = True):
+        return [Submission(raw) for raw in self._get('sections/%s/submissions/%s' % (section_id, assignment_id), {"with_attachments": int(with_attachments)})['revision']]
+
+    def get_user_assignment_submissions(self, section_id, assignment_id, user_id, with_attachments:bool = True):
+        return [Submission(raw) for raw in self._get('sections/%s/submissions/%s/%s' % (section_id, assignment_id, user_id), {"with_attachments": int(with_attachments)})['revision']]
+    
+
     # TODO: Support Course Content Folders
 
     def get_section_folder(self, section_id, folder_id):
