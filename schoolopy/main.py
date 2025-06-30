@@ -1903,7 +1903,7 @@ class Schoology:
         return Assignment(self._post('/sections/%s/assignments' % section_id, assignment.json()))
 
     def get_assignments(self, section_id, with_attachments: bool = True):
-        return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id, {"with_attachments": int(with_attachments)})['assignment']]
+        return [Assignment(raw) for raw in self._get('sections/%s/assignments' % section_id, {'with_attachments': int(with_attachments)})['assignment']]
 
     def get_file(self, url):
         """
@@ -1925,7 +1925,7 @@ class Schoology:
 
 
     def get_assignment(self, section_id, assignment_id, with_attachments: bool = True):
-        return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id), {"with_attachments": int(with_attachments)}))
+        return Assignment(self._get('sections/%s/assignments/%s' % (section_id, assignment_id), {'with_attachments': int(with_attachments)}))
 
 
     def get_assignment_comments(self, section_id, assignment_id):
@@ -1939,11 +1939,11 @@ class Schoology:
     # TODO: Support Attendance
     # TODO: Support Submissions
 
-    def get_assignment_submissions(self, section_id, assignment_id, with_attachments:bool = True):
-        return [Submission(raw) for raw in self._get('sections/%s/submissions/%s' % (section_id, assignment_id), {"with_attachments": int(with_attachments)})['revision']]
+    def get_assignment_submissions(self, section_id, assignment_id, with_attachments: bool = True):
+        return [Submission(raw) for raw in self._get('sections/%s/submissions/%s' % (section_id, assignment_id), {'with_attachments': int(with_attachments)})['revision']]
 
-    def get_user_assignment_submissions(self, section_id, assignment_id, user_id, with_attachments:bool = True):
-        return [Submission(raw) for raw in self._get('sections/%s/submissions/%s/%s' % (section_id, assignment_id, user_id), {"with_attachments": int(with_attachments)})['revision']]
+    def get_user_assignment_submissions(self, section_id, assignment_id, user_id, with_attachments: bool = True):
+        return [Submission(raw) for raw in self._get('sections/%s/submissions/%s/%s' % (section_id, assignment_id, user_id), {'with_attachments': int(with_attachments)})['revision']]
     
 
     # TODO: Support Course Content Folders
@@ -1953,11 +1953,11 @@ class Schoology:
 
     # TODO: Support Pages
 
-    def get_pages(self, section_id, with_content: bool = True, with_attachments:bool = True):
-        return [Page(raw) for raw in self._get('sections/%s/pages' % (section_id), {"withcontent": int(with_content), "with_attachments": int(with_attachments)})['page']]
+    def get_pages(self, section_id, with_content: bool = True, with_attachments: bool = True):
+        return [Page(raw) for raw in self._get('sections/%s/pages' % (section_id), {'withcontent': int(with_content), 'with_attachments': int(with_attachments)})['page']]
 
-    def get_section_page(self, page_id, section_id, with_attachments:bool = True):
-        return Page(self._get('sections/%s/page/%s' % (section_id, page_id), {"with_attachments": int(with_attachments)}))
+    def get_section_page(self, page_id, section_id, with_attachments: bool = True):
+        return Page(self._get('sections/%s/page/%s' % (section_id, page_id), {'with_attachments': int(with_attachments)}))
 
     # TODO: Support SCORM Packages
     # TODO: Support Web Content Package
