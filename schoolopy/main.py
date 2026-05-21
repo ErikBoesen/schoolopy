@@ -97,14 +97,14 @@ class Schoology:
         except json.decoder.JSONDecodeError:
             raise NoDataError(f'Put request to {response.url} failed: {response.text}')
 
-    def _delete(self, path):
+    def _delete(self, path, params={}):
         """
         Send a DELETE request to a given endpoint.
 
         :param path: Path (following API root) to endpoint.
         """
         response = self.schoology_auth.oauth.delete(
-            url=self.api_host + path,
+            url=self.api_host + path + self._get_params_string(params),
             headers=self.schoology_auth._request_header(),
             auth=self.schoology_auth.oauth.auth
         )
@@ -240,13 +240,13 @@ class Schoology:
         """
         return [User(raw) for raw in self._put('users', {'users': {'user': [user.json() for user in users]}})]
 
-    def delete_user(self, user_id):
+    def delete_user(self, user_id, params = {}):
         """
         Delete a user.
 
         :param user_id: ID of user you wish to delete.
         """
-        self._delete('users/%s' % user_id)
+        self._delete('users/%s' % user_id, params)
 
     def get_languages(self):
         """
